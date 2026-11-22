@@ -102,10 +102,37 @@ header.top .date { color: var(--muted); font-size: 13px; text-align: right; }
 .pill.bad { background: var(--bad-soft); color: var(--bad); }
 .pill.mute { background: var(--card-2); color: var(--muted); }
 
-.formula { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; font-size: 14px; padding-top: 12px; border-top: 1px dashed var(--line); }
-.formula span:nth-child(odd) { color: var(--muted); }
-.formula span:nth-child(even) { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.formula .total { color: var(--fg) !important; font-weight: 600; }
+.say { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 14px; font-size: 15px; line-height: 1.4; transition: background-color var(--t-ui) ease; }
+.say.good { background: var(--good-soft); } .say.warn { background: var(--warn-soft); } .say.bad { background: var(--bad-soft); }
+.say b { font-weight: 600; }
+.say-ic { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; flex: none; margin-top: 0; color: var(--accent-ink); }
+.say-ic svg { width: 14px; height: 14px; }
+.say.good .say-ic { background: var(--good); } .say.warn .say-ic { background: var(--warn); } .say.bad .say-ic { background: var(--bad); }
+.spend { display: flex; flex-direction: column; gap: 6px; }
+.meter.fat { height: 12px; }
+.spend-row { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; color: var(--muted); }
+.spend-row b { color: var(--fg); font-weight: 600; }
+.spend-of { font-size: 13px; color: var(--muted); }
+.tomorrow { font-size: 14px; color: var(--muted); line-height: 1.45; }
+.tomorrow b { color: var(--fg); font-weight: 600; }
+details.why { border-top: 1px solid var(--line); padding-top: 4px; }
+details.why > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding: 8px 0; font-size: 15px; font-weight: 600; color: var(--accent); -webkit-user-select: none; user-select: none; transition: opacity var(--t-press) var(--ease-out); }
+details.why > summary::-webkit-details-marker { display: none; }
+details.why > summary::after { content: "›"; font-size: 20px; transition: transform var(--t-ui) var(--ease-out); }
+details.why.is-open > summary::after { transform: rotate(90deg); }
+details.why > summary:active { opacity: .55; }
+.why-body { display: flex; flex-direction: column; gap: 12px; padding-bottom: 2px; }
+.why-body p { margin: 0; font-size: 14px; line-height: 1.45; }
+.split { display: flex; height: 30px; border-radius: 9px; overflow: hidden; gap: 2px; }
+.split i { display: block; min-width: 6px; }
+.split .debt { background: var(--accent); } .split .pen { background: var(--bad); } .split .free { background: var(--good); } .split .none { background: var(--line); flex: 1; }
+.split-legend { display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+.split-legend div { display: grid; grid-template-columns: 12px auto minmax(0, 1fr); gap: 8px; align-items: baseline; }
+.split-legend .sq { width: 12px; height: 12px; border-radius: 3px; align-self: start; margin-top: 4px; }
+.split-legend b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.split-legend span:last-child { color: var(--muted); }
+.why-mode { display: flex; flex-direction: column; gap: 8px; padding-top: 4px; }
+.why-mode .note { margin: 0; }
 
 .actions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
 .btn {
@@ -367,16 +394,35 @@ input[type="date"] { min-height: 46px; }
   <section class="card hero" id="heroCard" aria-labelledby="heroLabel">
     <div class="row">
       <span class="label" id="heroLabel">Можно потратить сегодня</span>
-      <span class="pill good" id="statusPill">В графике</span>
+      <span class="pill good" id="statusPill">Всё хорошо</span>
     </div>
     <div class="big num" id="leftToday">—</div>
-    <div class="meter" id="todayMeter"><i style="width:0%"></i></div>
-    <div class="sub" id="heroSub"></div>
-    <div class="formula" id="formula"></div>
-    <div class="seg" role="group" aria-label="Как считать доход">
-      <button type="button" id="modeNormal" aria-pressed="true">Обычно</button>
-      <button type="button" id="modeCareful" aria-pressed="false">Осторожно: по минимуму</button>
+    <div class="say good" id="heroSay" role="status">
+      <span class="say-ic" id="heroIc" aria-hidden="true"></span>
+      <span id="heroSub"></span>
     </div>
+    <div class="spend" id="spendBlock">
+      <div class="meter fat" id="todayMeter"><i></i></div>
+      <div class="spend-row"><span>Потратил <b class="num" id="spSpent">0 ₽</b></span><span>Осталось <b class="num" id="spLeft">0 ₽</b></span></div>
+      <div class="spend-of" id="spOf"></div>
+    </div>
+    <div class="tomorrow" id="heroTomorrow"></div>
+    <details class="why" id="whyBox">
+      <summary>Почему столько?</summary>
+      <div class="why-body">
+        <p id="whyText"></p>
+        <div class="split" id="whySplit" aria-hidden="true"></div>
+        <div class="split-legend" id="whyLegend"></div>
+        <div class="why-mode">
+          <div class="label">Как считать, сколько ко мне приходит</div>
+          <div class="seg" role="group" aria-label="Как считать доход">
+            <button type="button" id="modeNormal" aria-pressed="true">Обычно</button>
+            <button type="button" id="modeCareful" aria-pressed="false">Экономно</button>
+          </div>
+          <p class="note" id="modeHint"></p>
+        </div>
+      </div>
+    </details>
   </section>
 
   <div class="actions" id="mainActions">
@@ -732,7 +778,12 @@ input[type="date"] { min-height: 46px; }
     const now = replay();
     const ins = sorted().filter((e) => e.t === "in");
     const nextIn = ins.length ? addDays(ins[ins.length - 1].d, Math.round(avgInt())) : null;
-    return Object.assign({ today, now, nextIn, penLeftDays, left: res.L - res.spent }, res);
+    // Tomorrow's limit if nothing else is spent today.
+    const tmr = addDays(today, 1);
+    let penT = 0;
+    for (let k = 1; k <= 4; k++) { const o = over[addDays(tmr, -k)]; if (o) penT += o / 4; }
+    const tomorrowL = res.rate.r - needOn(tmr, now).need - penT;
+    return Object.assign({ today, now, nextIn, penLeftDays, tomorrowL, left: res.L - res.spent }, res);
   }
 
   function mpStatus(today) {
@@ -788,51 +839,88 @@ input[type="date"] { min-height: 46px; }
     });
   }
 
+  const ICON_OK = "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12.5l4.5 4.5L19 7.5'/></svg>";
+  const ICON_WARN = "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round'><path d='M12 6v8M12 18.5v.01'/></svg>";
+  function sayState(kind, html) {
+    const box = $("heroSay");
+    box.className = "say " + kind;
+    $("heroIc").innerHTML = kind === "good" ? ICON_OK : ICON_WARN;
+    $("heroSub").innerHTML = html;
+  }
+
   function renderHero(c) {
-    const pill = $("statusPill"), big = $("leftToday"), sub = $("heroSub"), meter = $("todayMeter");
+    const pill = $("statusPill"), big = $("leftToday"), meter = $("todayMeter");
     big.classList.remove("text");
     $("modeNormal").setAttribute("aria-pressed", state.mode !== "careful");
     $("modeCareful").setAttribute("aria-pressed", state.mode === "careful");
     $("modeNormal").parentElement.dataset.on = state.mode === "careful" ? "1" : "0";
-    $("modeNormal").textContent = "Обычно: " + numStr(state.incMin / 1000) + "–" + numStr(state.incMax / 1000) + " тыс.";
+    $("modeHint").textContent = c.rate.src === "по твоим пополнениям"
+      ? (state.mode === "careful" ? "Экономно: беру меньшее из твоих настоящих пополнений и минимума. Лимит меньше, зато надёжнее." : "Считаю по твоим настоящим пополнениям: в среднем " + rub(c.rate.r) + " в день.")
+      : (state.mode === "careful" ? "Экономно: считаю, что будет приходить только " + rub(state.incMin) + " раз в " + numStr(state.intMax) + " дней. Лимит меньше, зато надёжнее." : "Считаю, что приходит " + fmt0.format(state.incMin) + "–" + rub(state.incMax) + " раз в " + numStr(state.intMin) + "–" + numStr(state.intMax) + " дней.");
+
     if (c.now.debt <= 0) {
       setValue(big, "Долг закрыт"); big.classList.add("text");
       pill.className = "pill good"; pill.textContent = "Свободен";
-      meter.hidden = true; $("formula").hidden = true;
-      sub.innerHTML = c.now.extra > 0 ? "На карте твои деньги: <b class='num'>" + rub2(c.now.extra) + "</b>." : "Тратить можно всё, что приходит.";
+      $("spendBlock").hidden = true; $("heroTomorrow").hidden = true; $("whyBox").hidden = true;
+      sayState("good", c.now.extra > 0 ? "Поздравляю! На карте лежат твои деньги: <b>" + rub2(c.now.extra) + "</b>. Тратить можно всё, что приходит." : "Поздравляю! Долга нет, тратить можно всё, что приходит.");
       return;
     }
-    meter.hidden = false; $("formula").hidden = false;
+    $("spendBlock").hidden = false; $("heroTomorrow").hidden = false; $("whyBox").hidden = false;
+
     const lim = Math.max(0, Math.floor(c.L));
-    setValue(big, fmt0.format(Math.max(0, Math.floor(c.left))) + "<small>₽</small>", true);
+    const left = Math.floor(c.left);
+    setValue(big, fmt0.format(Math.max(0, left)) + "<small>₽</small>", true);
     fill(meter.firstElementChild, lim > 0 ? Math.min(100, c.spent / lim * 100) : (c.spent > 0 ? 100 : 0));
-    meter.classList.toggle("over", c.left < 0);
+    meter.classList.toggle("over", c.left < 0 || (lim === 0 && c.spent > 0));
+    $("spSpent").textContent = rub(c.spent);
+    $("spLeft").textContent = rub(Math.max(0, left));
+    $("spOf").textContent = "Всего на сегодня: " + rub(lim) + ". Считается только то, что платишь этой кредиткой.";
+
     if (c.L <= 0) {
-      pill.className = "pill bad"; pill.textContent = "Только гасить";
-      sub.innerHTML = c.pen > 0 && c.base > 0
-        ? "Сегодня лимит съел перерасход прошлых дней. Завтра станет легче."
-        : "Дохода не хватает, чтобы успеть к сроку. Лучше пока не тратить с карты.";
+      pill.className = "pill bad"; pill.textContent = "Не тратить";
+      sayState("bad", c.pen > 0 && c.base > 0
+        ? "<b>Сегодня лучше ничего не покупать с карты.</b> Ты возвращаешь перерасход прошлых дней. Через пару дней станет легче."
+        : "<b>Сегодня лучше ничего не покупать с карты.</b> Денег приходит меньше, чем нужно отдавать в долг.");
     } else if (c.left < 0) {
       pill.className = "pill bad"; pill.textContent = "Перерасход";
-      sub.innerHTML = "Лимит <b class='num'>" + rub(lim) + "</b>, потрачено <b class='num'>" + rub(c.spent) + "</b>. Перерасход <b class='num'>" + rub(-c.left) + "</b> вычтется из лимита следующих 4 дней.";
+      sayState("bad", "<b>Ты потратил на " + rub(-c.left) + " больше, чем можно.</b> Ничего страшного: следующие 4 дня можно будет тратить чуть меньше.");
     } else if (c.spent > 0 && c.left < c.L * 0.25) {
       pill.className = "pill warn"; pill.textContent = "Почти всё";
-      sub.innerHTML = "Лимит на день <b class='num'>" + rub(lim) + "</b>, уже потрачено <b class='num'>" + rub(c.spent) + "</b>.";
+      sayState("warn", "<b>Осталось совсем немного.</b> Постарайся сегодня больше ничего не покупать.");
+    } else if (c.spent === 0) {
+      pill.className = "pill good"; pill.textContent = "Всё хорошо";
+      sayState("good", "<b>Всё хорошо.</b> Сегодня ты ещё ничего не тратил. Можно потратить до " + rub(lim) + ".");
     } else {
-      pill.className = "pill good"; pill.textContent = "В графике";
-      sub.innerHTML = c.spent > 0
-        ? "Лимит на день <b class='num'>" + rub(lim) + "</b>, уже потрачено <b class='num'>" + rub(c.spent) + "</b>."
-        : "Лимит на день <b class='num'>" + rub(lim) + "</b>. Не потратил — завтра будет немного больше.";
+      pill.className = "pill good"; pill.textContent = "Всё хорошо";
+      sayState("good", "<b>Всё хорошо.</b> Можешь потратить ещё " + rub(left) + ".");
     }
-    const T = c.nd.byDate ? days(c.today, c.nd.byDate) + 1 : 0;
-    const why = c.nd.by === "goal" ? "закрыть всё к " + human(c.nd.byDate) + " (" + dayWord(T) + ")"
-      : c.nd.by === "bucket" ? "успеть к " + human(c.nd.byDate) + " (" + dayWord(Math.max(0, T)) + ")"
-      : c.nd.by === "cash" ? "погасить долг без льготы" : "успеть к срокам";
-    let rows = "<span>Доход в среднем (" + c.rate.src + ")</span><span>+" + rub(c.rate.r) + " / день</span>" +
-      "<span>На долг, чтобы " + why + "</span><span>−" + rub(c.nd.need) + " / день</span>";
-    if (c.pen > 0.5) rows += "<span>Перерасход прошлых дней (ещё " + dayWord(c.penLeftDays) + ")</span><span>−" + rub(c.pen) + "</span>";
-    rows += "<span class='total'>Можно тратить</span><span class='total'>" + rub(Math.max(0, c.L)) + " / день</span>";
-    $("formula").innerHTML = rows;
+
+    const tl = Math.max(0, Math.floor(c.tomorrowL));
+    $("heroTomorrow").innerHTML = (c.left >= 0 ? "Если сегодня больше ничего не потратишь, завтра можно будет <b>" : "Завтра можно будет примерно <b>") + rub(tl) + "</b>.";
+
+    // why: split of the average daily income
+    const inc = Math.max(0, c.rate.r), pen = c.pen, free = Math.max(0, Math.floor(c.L));
+    const need = c.L > 0 ? Math.max(0, inc - pen - free) : c.nd.need; // the three parts add up to the income shown
+    const T = c.nd.byDate ? Math.max(0, days(c.today, c.nd.byDate) + 1) : 0;
+    const why = c.nd.by === "goal" ? "чтобы закрыть весь долг к " + human(c.nd.byDate)
+      : c.nd.by === "bucket" ? "чтобы успеть к сроку банка " + human(c.nd.byDate)
+      : c.nd.by === "cash" ? "чтобы быстрее погасить переводы (на них идут проценты)" : "чтобы успеть к срокам";
+    $("whyText").innerHTML = "В среднем к тебе приходит около <b>" + rub(inc) + " в день</b>. Эти деньги делятся так:";
+    const parts = [];
+    if (inc > 0) {
+      const tot = Math.max(inc, need + pen);
+      const w = (v) => (v / tot * 100).toFixed(1) + "%";
+      parts.push("<i class='debt' style='width:" + w(Math.min(need, tot)) + "'></i>");
+      if (pen > 0.5) parts.push("<i class='pen' style='width:" + w(Math.min(pen, Math.max(0, tot - need))) + "'></i>");
+      if (free > 0.5) parts.push("<i class='free' style='width:" + w(free) + "'></i>");
+    } else parts.push("<i class='none'></i>");
+    $("whySplit").innerHTML = parts.join("");
+    const leg = ["<div><i class='sq' style='background:var(--accent)'></i><b>" + rub(need) + "</b><span>отдаёшь в долг, " + why + (T ? " (осталось " + dayWord(T) + ")" : "") + "</span></div>"];
+    if (pen > 0.5) leg.push("<div><i class='sq' style='background:var(--bad)'></i><b>" + rub(pen) + "</b><span>возвращаешь перерасход прошлых дней (ещё " + dayWord(c.penLeftDays) + ")</span></div>");
+    leg.push(free > 0.5
+      ? "<div><i class='sq' style='background:var(--good)'></i><b>" + rub(free) + "</b><span>остаётся тебе: это и есть лимит на день</span></div>"
+      : "<div><i class='sq' style='background:var(--line)'></i><b>0 ₽</b><span>на траты ничего не остаётся</span></div>");
+    $("whyLegend").innerHTML = leg.join("");
   }
 
   function icsHref() {
@@ -1473,10 +1561,10 @@ input[type="date"] { min-height: 46px; }
     toast("Готово. Вот твой лимит на сегодня");
   });
 
-  // ---------- settings accordion ----------
+  // ---------- accordions (settings, "why") ----------
   // Height + opacity on the panel (no transform equivalent for an accordion); short, interruptible, reversible mid-way.
-  (function () {
-    const box = $("settingsBox"), panel = box.querySelector(".settings"), summary = box.querySelector("summary");
+  function accordion(box, panel) {
+    const summary = box.querySelector("summary");
     let a = null;
     box.addEventListener("toggle", () => { if (!a) box.classList.toggle("is-open", box.open); });
     summary.addEventListener("click", (e) => {
@@ -1496,11 +1584,13 @@ input[type="date"] { min-height: 46px; }
       const done = () => {
         a = null; panel.style.overflow = "";
         if (!opening) box.open = false;
-        else summary.scrollIntoView ? box.scrollIntoView({ block: "nearest", behavior: reduce() ? "auto" : "smooth" }) : 0;
+        else box.scrollIntoView({ block: "nearest", behavior: reduce() ? "auto" : "smooth" });
       };
       if (a) a.onfinish = done; else done();
     });
-  })();
+  }
+  accordion($("settingsBox"), $("settingsBox").querySelector(".settings"));
+  accordion($("whyBox"), $("whyBox").querySelector(".why-body"));
 
   // ---------- wiring ----------
   $("btnIn").addEventListener("click", () => openSheet("in"));
