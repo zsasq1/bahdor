@@ -14,43 +14,28 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
-<style>
-:root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
-body { margin: 0; min-height: 100vh; }
-img { max-width: 100%; }
-[hidden] { display: none !important; }
-html { -webkit-text-size-adjust: 100%; }
-</style>
-</head>
-<body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap">
 <style>
-/* Layout: one narrow column, phone-first; summary (today's limit) on top, actions, then deadlines, then history and settings. */
+/* Layout: one narrow phone column. Alerts, today's limit, actions, mandatory payment, debt, grace buckets by month, history, settings. */
 :root {
-  --bg: #F4F3EE;
-  --card: #FBFAF7;
-  --card-2: #EEECE4;
-  --line: #E2DFD4;
-  --fg: #1F1E1B;
-  --muted: #6E6B62;
-  --accent: #C2603E;
-  --accent-ink: #FFFFFF;
-  --accent-soft: #F3E1D8;
-  --good: #4D7A4A;
-  --good-soft: #E1EBDD;
-  --warn: #A86B12;
-  --warn-soft: #F4E6CC;
-  --bad: #B0412F;
-  --bad-soft: #F4DCD6;
+  --bg: #F4F3EE; --card: #FBFAF7; --card-2: #EEECE4; --line: #E2DFD4;
+  --fg: #1F1E1B; --muted: #6E6B62;
+  --accent: #C2603E; --accent-ink: #FFFFFF; --accent-soft: #F3E1D8;
+  --good: #4D7A4A; --good-soft: #E1EBDD;
+  --warn: #A86B12; --warn-soft: #F4E6CC;
+  --bad: #B0412F; --bad-soft: #F4DCD6;
   --scrim: rgba(31, 30, 27, .38);
   --serif: "Source Serif 4", "Iowan Old Style", Georgia, serif;
   --sans: "Inter", -apple-system, "SF Pro Text", system-ui, sans-serif;
   --r: 18px;
+  color-scheme: light;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root {
     --bg: #262624; --card: #30302D; --card-2: #3A3936; --line: #45443F;
     --fg: #F2F0E9; --muted: #A8A59B; --accent: #DA7A57; --accent-ink: #1F1E1B; --accent-soft: #4A3229;
     --good: #8DBB87; --good-soft: #2F3B2D; --warn: #E0AA55; --warn-soft: #463A26; --bad: #E88A78; --bad-soft: #4A2C27;
@@ -58,20 +43,15 @@ html { -webkit-text-size-adjust: 100%; }
     color-scheme: dark;
   }
 }
-:root[data-theme="dark"] {
-  --bg: #262624; --card: #30302D; --card-2: #3A3936; --line: #45443F;
-  --fg: #F2F0E9; --muted: #A8A59B; --accent: #DA7A57; --accent-ink: #1F1E1B; --accent-soft: #4A3229;
-  --good: #8DBB87; --good-soft: #2F3B2D; --warn: #E0AA55; --warn-soft: #463A26; --bad: #E88A78; --bad-soft: #4A2C27;
-  --scrim: rgba(0, 0, 0, .55);
-  color-scheme: dark;
-}
 * { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
 body {
+  margin: 0; min-height: 100vh;
   background: var(--bg); color: var(--fg);
   font-family: var(--sans); font-size: 15px; line-height: 1.45;
-  -webkit-font-smoothing: antialiased;
-  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
 }
+[hidden] { display: none !important; }
 .wrap {
   max-width: 520px; margin: 0 auto;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
@@ -82,132 +62,138 @@ body {
 .num { font-variant-numeric: tabular-nums; }
 header.top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-block: 4px 2px; }
 header.top h1 { font-family: var(--serif); font-weight: 500; font-size: 26px; margin: 0; letter-spacing: -.01em; }
-header.top .date { color: var(--muted); font-size: 13px; }
+header.top .date { color: var(--muted); font-size: 13px; text-align: right; }
 
-.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; min-width: 0; }
 .label { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.note { font-size: 13px; color: var(--muted); }
 
-/* Hero */
+.alerts { display: flex; flex-direction: column; gap: 8px; }
+.alert { border-radius: 14px; padding: 12px 14px; font-size: 14px; display: flex; flex-direction: column; gap: 2px; }
+.alert b { font-weight: 600; }
+.alert.bad { background: var(--bad-soft); } .alert.bad b { color: var(--bad); }
+.alert.warn { background: var(--warn-soft); } .alert.warn b { color: var(--warn); }
+.alert.info { background: var(--card-2); }
+
 .hero { padding: 22px 20px 20px; display: flex; flex-direction: column; gap: 10px; }
-.hero-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .big { font-family: var(--serif); font-weight: 500; font-size: clamp(48px, 15vw, 64px); line-height: 1; letter-spacing: -.02em; margin: 4px 0 2px; }
 .big small { font-size: .5em; color: var(--muted); font-weight: 400; margin-left: 4px; }
+.big.text { font-size: 38px; }
 .hero .sub { color: var(--muted); font-size: 14px; }
 .hero .sub b { color: var(--fg); font-weight: 600; }
 .meter { height: 8px; border-radius: 99px; background: var(--card-2); overflow: hidden; }
 .meter > i { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width .4s ease; }
 .meter.over > i { background: var(--bad); }
+.meter.paid > i { background: var(--good); }
 .pill { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 99px; white-space: nowrap; }
 .pill.good { background: var(--good-soft); color: var(--good); }
 .pill.warn { background: var(--warn-soft); color: var(--warn); }
 .pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.mute { background: var(--card-2); color: var(--muted); }
 
-.formula { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; font-size: 14px; padding-top: 12px; border-top: 1px dashed var(--line); }
+.formula { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; font-size: 14px; padding-top: 12px; border-top: 1px dashed var(--line); }
 .formula span:nth-child(odd) { color: var(--muted); }
-.formula span:nth-child(even) { text-align: right; font-variant-numeric: tabular-nums; }
+.formula span:nth-child(even) { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .formula .total { color: var(--fg) !important; font-weight: 600; }
 
-/* Actions */
-.actions { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; }
+.actions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
 .btn {
   appearance: none; border: 0; font: inherit; font-weight: 600; font-size: 16px;
   border-radius: 14px; padding: 15px 14px; cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  transition: transform .08s ease, filter .15s;
+  transition: transform .08s ease; color: var(--fg); text-decoration: none;
 }
 .btn:active { transform: scale(.98); }
-.btn:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .btn.primary { background: var(--accent); color: var(--accent-ink); }
 .btn.ghost { background: var(--card); color: var(--fg); border: 1px solid var(--line); }
+.btn.small { font-size: 14px; padding: 10px 12px; border-radius: 12px; }
 .btn svg { width: 18px; height: 18px; }
+.btn.danger { color: var(--bad); }
 
-.mode { display: flex; background: var(--card-2); border-radius: 12px; padding: 3px; gap: 3px; }
-.mode button { flex: 1; appearance: none; border: 0; background: transparent; font: inherit; font-size: 13px; font-weight: 500; color: var(--muted); padding: 8px 6px; border-radius: 9px; cursor: pointer; }
-.mode button[aria-pressed="true"] { background: var(--card); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.seg { display: flex; background: var(--card-2); border-radius: 12px; padding: 3px; gap: 3px; }
+.seg button { flex: 1; min-width: 0; appearance: none; border: 0; background: transparent; font: inherit; font-size: 13px; font-weight: 500; color: var(--muted); padding: 8px 6px; border-radius: 9px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--card); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
 
-/* Debt */
-.debt-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .debt-sum { font-family: var(--serif); font-size: 30px; font-weight: 500; letter-spacing: -.01em; margin-top: 4px; }
-.linkbtn { appearance: none; border: 0; background: none; font: inherit; font-size: 14px; font-weight: 500; color: var(--accent); cursor: pointer; padding: 4px 0; white-space: nowrap; }
-.debt-foot { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; margin-top: 8px; gap: 10px; }
-.meter.paid > i { background: var(--good); }
+.linkbtn { appearance: none; border: 0; background: none; font: inherit; font-size: 14px; font-weight: 500; color: var(--accent); cursor: pointer; padding: 4px 0; white-space: nowrap; text-decoration: none; }
+.foot { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; margin-top: 8px; gap: 10px; flex-wrap: wrap; }
 
-/* Deadlines */
-.dl { display: flex; flex-direction: column; gap: 0; }
-.dl-item { display: grid; grid-template-columns: 54px 1fr; gap: 14px; padding-block: 14px; border-top: 1px solid var(--line); }
-.dl-item:first-of-type { border-top: 0; padding-top: 10px; }
+.dl { display: flex; flex-direction: column; }
+.dl-item { display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 14px; padding-block: 14px; border-top: 1px solid var(--line); }
+.dl-item:first-child { border-top: 0; padding-top: 10px; }
 .cal { border-radius: 12px; background: var(--card-2); text-align: center; padding: 6px 0 7px; align-self: start; }
 .cal b { display: block; font-family: var(--serif); font-size: 22px; font-weight: 500; line-height: 1.1; }
 .cal span { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.cal.bad { background: var(--bad-soft); } .cal.bad b { color: var(--bad); }
 .dl-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .dl-title { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; font-weight: 600; }
-.dl-note { font-size: 13px; color: var(--muted); }
+.btns { display: flex; gap: 18px; flex-wrap: wrap; }
+.tip { font-size: 13px; color: var(--muted); padding-top: 12px; border-top: 1px dashed var(--line); }
 
-/* History */
 .hist { list-style: none; margin: 8px 0 0; padding: 0; }
-.hist li { display: grid; grid-template-columns: 34px 1fr auto auto; gap: 10px; align-items: center; padding-block: 10px; border-top: 1px solid var(--line); }
+.hist li { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding-block: 10px; border-top: 1px solid var(--line); }
 .hist li:first-child { border-top: 0; }
 .ico { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-weight: 600; font-size: 16px; }
 .ico.in { background: var(--good-soft); color: var(--good); }
 .ico.out { background: var(--accent-soft); color: var(--accent); }
+.ico.cash { background: var(--bad-soft); color: var(--bad); }
 .ico.sync { background: var(--card-2); color: var(--muted); font-size: 13px; }
-.hist .what { min-width: 0; }
 .hist .what div:first-child { font-weight: 500; }
 .hist .what div:last-child { font-size: 12px; color: var(--muted); }
-.hist .amt { font-weight: 600; font-variant-numeric: tabular-nums; }
+.hist .amt { font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
 .hist .amt.in { color: var(--good); }
 .del { appearance: none; border: 0; background: none; color: var(--muted); font: inherit; font-size: 13px; cursor: pointer; padding: 6px 4px; border-radius: 8px; }
 .del.armed { color: var(--bad); font-weight: 600; }
 .empty { color: var(--muted); font-size: 14px; padding: 10px 0 2px; }
-.more { margin-top: 6px; }
 
-/* Settings */
 details.card { padding: 0; }
 details.card > summary { list-style: none; cursor: pointer; padding: 16px 18px; display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
 details.card > summary::-webkit-details-marker { display: none; }
 details.card > summary::after { content: "›"; font-size: 20px; color: var(--muted); transition: transform .2s; }
 details.card[open] > summary::after { transform: rotate(90deg); }
-.settings { padding: 0 18px 18px; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 12px; }
+.settings { padding: 0 18px 18px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
 .settings .full { grid-column: 1 / -1; }
-.settings h4 { grid-column: 1 / -1; margin: 8px 0 -4px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.settings h4 { grid-column: 1 / -1; margin: 10px 0 -4px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
 .field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .field label { font-size: 13px; color: var(--muted); }
-input[type="text"], input[type="date"], input[type="number"] {
+input[type="text"], input[type="date"] {
   width: 100%; min-width: 0; font: inherit; font-size: 16px; color: var(--fg);
   background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px;
   -webkit-appearance: none; appearance: none;
 }
 input[type="date"] { min-height: 46px; }
-.danger { color: var(--bad); }
 
-.howto { font-size: 13px; color: var(--muted); text-align: center; padding: 6px 10px 0; text-wrap: balance; }
-.sync { font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
-.sync i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); display: inline-block; }
-.sync.ok i { background: var(--good); }
-.sync.err i { background: var(--bad); }
+.setup { display: flex; flex-direction: column; gap: 14px; padding: 22px 20px; }
+.setup h2 { font-family: var(--serif); font-weight: 500; font-size: 26px; margin: 0; }
+.setup p { margin: 0; color: var(--muted); font-size: 14px; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.err { color: var(--bad); font-size: 13px; }
+.err:empty { display: none; }
 
-/* Sheet */
+.howto { font-size: 13px; color: var(--muted); text-align: center; padding: 6px 10px 0; text-wrap: balance; margin: 0; }
+
 .scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 40; opacity: 0; transition: opacity .2s; }
 .scrim.show { opacity: 1; }
 .sheet {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
   background: var(--card); border-radius: 22px 22px 0 0; border-top: 1px solid var(--line);
-  padding-top: 10px;
-  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-  padding-left: max(18px, env(safe-area-inset-left, 0px));
-  padding-right: max(18px, env(safe-area-inset-right, 0px));
+  padding-top: 10px; padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px));
   transform: translateY(105%); transition: transform .25s cubic-bezier(.2,.8,.2,1);
-  max-width: 560px; margin: 0 auto;
+  max-width: 560px; margin: 0 auto; max-height: 92vh; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 12px;
 }
 .sheet.show { transform: none; }
-.grab { width: 40px; height: 5px; border-radius: 99px; background: var(--line); margin: 0 auto 14px; }
-.sheet h2 { font-family: var(--serif); font-weight: 500; font-size: 24px; margin: 0 0 4px; }
-.sheet p { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+.grab { width: 40px; height: 5px; border-radius: 99px; background: var(--line); margin: 0 auto 2px; flex: none; }
+.sheet h2 { font-family: var(--serif); font-weight: 500; font-size: 24px; margin: 0; }
+.sheet p { margin: 0; color: var(--muted); font-size: 14px; }
 .amount-in { font-family: var(--serif); font-size: 34px !important; padding: 10px 14px !important; }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { appearance: none; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font: inherit; font-size: 14px; font-weight: 500; border-radius: 99px; padding: 8px 14px; cursor: pointer; font-variant-numeric: tabular-nums; }
-.sheet-row { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 14px; }
-.sheet .err { color: var(--bad); font-size: 13px; min-height: 18px; margin: -6px 0 8px; }
+.feeline { font-size: 14px; border-radius: 12px; padding: 10px 12px; background: var(--bad-soft); }
+.feeline b { color: var(--bad); }
 
 .toast {
   position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px);
@@ -215,18 +201,10 @@ input[type="date"] { min-height: 46px; }
   opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 60; width: max-content; max-width: calc(100% - 32px); text-align: center;
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
-
-.setup { display: flex; flex-direction: column; gap: 14px; padding: 22px 20px; }
-.setup[hidden] { display: none !important; }
-.setup h2 { font-family: var(--serif); font-weight: 500; font-size: 26px; margin: 0; }
-.setup p { margin: 0; color: var(--muted); font-size: 14px; }
-.setup-two { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 12px; }
-.setup .err { color: var(--bad); font-size: 13px; min-height: 0; }
-.setup .err:empty { display: none; }
-
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
-
+</head>
+<body>
 <div class="wrap">
   <header class="top">
     <h1>Бахдор</h1>
@@ -235,49 +213,34 @@ input[type="date"] { min-height: 46px; }
 
   <form class="card setup" id="setup" hidden autocomplete="off">
     <h2>Давай настроим</h2>
-    <p>Открой приложение банка, раздел кредитки, и перепиши три цифры. Это нужно один раз, всё хранится только на этом телефоне.</p>
+    <p>Открой СберБанк Онлайн → кредитка → «Мой беспроцентный период» и перепиши цифры. Это нужно один раз, всё хранится только на этом телефоне.</p>
     <div class="field">
       <label for="uDebt">«Вся задолженность на сегодня», ₽</label>
       <input id="uDebt" type="text" inputmode="decimal" placeholder="например, 15 000">
     </div>
-    <div class="setup-two">
-      <div class="field">
-        <label for="uCpAmount">«Осталось внести», ₽</label>
-        <input id="uCpAmount" type="text" inputmode="decimal" placeholder="если есть">
-      </div>
-      <div class="field">
-        <label for="uCpDate">до какого числа</label>
-        <input id="uCpDate" type="date">
-      </div>
+    <div class="two">
+      <div class="field"><label for="uCpAmount">«Осталось внести», ₽</label><input id="uCpAmount" type="text" inputmode="decimal" placeholder="если есть"></div>
+      <div class="field"><label for="uCpDate">до какого числа</label><input id="uCpDate" type="date"></div>
     </div>
     <div class="field">
-      <label for="uGoal">Беспроцентный период до (закрыть весь долг)</label>
+      <label for="uGoal">Закрыть весь долг до (можно не заполнять)</label>
       <input id="uGoal" type="date">
     </div>
-    <div class="setup-two">
-      <div class="field">
-        <label for="uIncMin">Получаю от, ₽</label>
-        <input id="uIncMin" type="text" inputmode="numeric" value="3000">
-      </div>
-      <div class="field">
-        <label for="uIncMax">до, ₽</label>
-        <input id="uIncMax" type="text" inputmode="numeric" value="5000">
-      </div>
-      <div class="field">
-        <label for="uIntMin">Раз в, дней (от)</label>
-        <input id="uIntMin" type="text" inputmode="numeric" value="4">
-      </div>
-      <div class="field">
-        <label for="uIntMax">до</label>
-        <input id="uIntMax" type="text" inputmode="numeric" value="5">
-      </div>
+    <div class="two">
+      <div class="field"><label for="uIncMin">Получаю от, ₽</label><input id="uIncMin" type="text" inputmode="numeric" value="3000"></div>
+      <div class="field"><label for="uIncMax">до, ₽</label><input id="uIncMax" type="text" inputmode="numeric" value="5000"></div>
+      <div class="field"><label for="uIntMin">Раз в, дней (от)</label><input id="uIntMin" type="text" inputmode="numeric" value="4"></div>
+      <div class="field"><label for="uIntMax">до</label><input id="uIntMax" type="text" inputmode="numeric" value="5"></div>
     </div>
     <div class="err" id="setupErr"></div>
     <button class="btn primary" type="submit">Посчитать</button>
+    <button class="btn ghost small" type="button" id="setupImport">Загрузить копию</button>
   </form>
 
+  <div class="alerts" id="alerts"></div>
+
   <section class="card hero" id="heroCard" aria-labelledby="heroLabel">
-    <div class="hero-row">
+    <div class="row">
       <span class="label" id="heroLabel">Можно потратить сегодня</span>
       <span class="pill good" id="statusPill">В графике</span>
     </div>
@@ -285,13 +248,13 @@ input[type="date"] { min-height: 46px; }
     <div class="meter" id="todayMeter"><i style="width:0%"></i></div>
     <div class="sub" id="heroSub"></div>
     <div class="formula" id="formula"></div>
-    <div class="mode" role="group" aria-label="Как считать доход">
-      <button type="button" id="modeNormal" aria-pressed="true">Обычно: 3–5 тыс.</button>
+    <div class="seg" role="group" aria-label="Как считать доход">
+      <button type="button" id="modeNormal" aria-pressed="true">Обычно</button>
       <button type="button" id="modeCareful" aria-pressed="false">Осторожно: по минимуму</button>
     </div>
   </section>
 
-  <div class="actions">
+  <div class="actions" id="mainActions">
     <button class="btn primary" id="btnIn" type="button">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
       Пополнил
@@ -302,8 +265,13 @@ input[type="date"] { min-height: 46px; }
     </button>
   </div>
 
+  <section class="card" id="mpCard" aria-labelledby="mpLabel">
+    <div class="label" id="mpLabel">Обязательный платёж</div>
+    <div id="mpBody"></div>
+  </section>
+
   <section class="card" id="debtCard" aria-labelledby="debtLabel">
-    <div class="debt-head">
+    <div class="row" style="align-items:flex-start">
       <div>
         <div class="label" id="debtLabel">Вся задолженность</div>
         <div class="debt-sum num" id="debtNow">—</div>
@@ -311,60 +279,69 @@ input[type="date"] { min-height: 46px; }
       <button class="linkbtn" id="btnSync" type="button">Сверить с банком</button>
     </div>
     <div class="meter paid" id="debtMeter" style="margin-top:12px"><i style="width:0%"></i></div>
-    <div class="debt-foot"><span id="debtPaid"></span><span id="debtStart"></span></div>
+    <div class="foot"><span id="debtPaid"></span><span id="debtStart"></span></div>
   </section>
 
   <section class="card" id="dlCard" aria-labelledby="dlLabel">
-    <div class="label" id="dlLabel">Беспроцентный период</div>
-    <div class="dl" id="deadlines"></div>
+    <div class="label" id="dlLabel">Беспроцентный период по месяцам</div>
+    <div class="dl" id="buckets"></div>
+    <div class="tip" id="bucketTip"></div>
   </section>
 
-  <section class="card" aria-labelledby="histLabel">
-    <div class="hero-row">
+  <section class="card" id="histCard" aria-labelledby="histLabel">
+    <div class="row">
       <span class="label" id="histLabel">История</span>
-      <span class="sync" id="syncState"><i></i><span>Сохраняю на устройстве</span></span>
+      <span class="note" id="backupNag"></span>
     </div>
     <ul class="hist" id="hist"></ul>
     <div class="empty" id="histEmpty">Пока пусто. Положил деньги на карту — жми «Пополнил». Потратил с карты — «Потратил». Лимит пересчитается сам.</div>
-    <button class="linkbtn more" id="btnMore" type="button" hidden>Показать всё</button>
+    <button class="linkbtn" id="btnMore" type="button" hidden>Показать всё</button>
   </section>
 
   <details class="card" id="settingsBox">
-    <summary>Настройки</summary>
+    <summary>Настройки и копия</summary>
     <div class="settings">
-      <h4>Долг на старте</h4>
-      <div class="field"><label for="sStartDebt">Сумма, ₽</label><input id="sStartDebt" type="text" inputmode="decimal"></div>
-      <div class="field"><label for="sStartDate">На дату</label><input id="sStartDate" type="date"></div>
-      <h4>Сроки</h4>
-      <div class="field"><label for="sCpAmount">Внести, ₽</label><input id="sCpAmount" type="text" inputmode="decimal"></div>
-      <div class="field"><label for="sCpDate">До</label><input id="sCpDate" type="date"></div>
+      <h4>Резервная копия</h4>
+      <div class="note full" id="backupInfo"></div>
+      <button class="btn ghost small" type="button" id="btnExport">Сохранить копию</button>
+      <button class="btn ghost small" type="button" id="btnImport">Загрузить копию</button>
+      <h4>Цель</h4>
       <div class="field full"><label for="sGoalDate">Закрыть весь долг до</label><input id="sGoalDate" type="date"></div>
       <h4>Мой доход</h4>
       <div class="field"><label for="sIncMin">От, ₽</label><input id="sIncMin" type="text" inputmode="numeric"></div>
       <div class="field"><label for="sIncMax">До, ₽</label><input id="sIncMax" type="text" inputmode="numeric"></div>
       <div class="field"><label for="sIntMin">Раз в, дней (от)</label><input id="sIntMin" type="text" inputmode="numeric"></div>
       <div class="field"><label for="sIntMax">Раз в, дней (до)</label><input id="sIntMax" type="text" inputmode="numeric"></div>
-      <div class="field full" style="margin-top:6px">
-        <button class="btn ghost danger" id="btnReset" type="button">Стереть все записи</button>
-      </div>
+      <h4>Комиссия за переводы и наличные</h4>
+      <div class="field"><label for="sFeePct">Процент, %</label><input id="sFeePct" type="text" inputmode="decimal"></div>
+      <div class="field"><label for="sFeeFix">Плюс, ₽</label><input id="sFeeFix" type="text" inputmode="decimal"></div>
+      <div class="note full">Проверь в СберБанк Онлайн → кредитка → «Тарифы». Здесь стоит 5,9% + 590 ₽ по данным из интернета.</div>
+      <div class="full" style="margin-top:8px"><button class="btn ghost danger small" id="btnReset" type="button" style="width:100%">Начать заново</button></div>
     </div>
   </details>
 
-  <p class="howto">На iPhone: Safari → «Поделиться» → «На экран „Домой“». Записи хранятся только на этом телефоне.</p>
+  <p class="howto">На iPhone: Safari → «Поделиться» → «На экран „Домой“». Пользуйся только иконкой: у неё свои записи, отдельно от Safari.</p>
 </div>
+
+<input type="file" id="importFile" accept=".json,application/json,text/plain" hidden>
 
 <div class="scrim" id="scrim" hidden></div>
 <form class="sheet" id="sheet" hidden autocomplete="off">
   <div class="grab"></div>
   <h2 id="sheetTitle">Пополнение</h2>
   <p id="sheetHint"></p>
-  <div class="sheet-row">
-    <input class="amount-in num" id="sheetAmount" type="text" inputmode="decimal" placeholder="0 ₽" aria-label="Сумма">
+  <div class="seg" id="kindSeg" role="group" aria-label="Тип траты">
+    <button type="button" id="kindBuy" aria-pressed="true">Покупка картой</button>
+    <button type="button" id="kindCash" aria-pressed="false">Перевод · наличные · СБП</button>
   </div>
+  <input class="amount-in num" id="sheetAmount" type="text" inputmode="decimal" placeholder="0 ₽" aria-label="Сумма">
   <div class="chips" id="sheetChips"></div>
-  <div class="sheet-row">
-    <div class="field"><label for="sheetDate">Дата</label><input id="sheetDate" type="date"></div>
+  <div class="feeline" id="feeLine" hidden></div>
+  <div class="two" id="syncExtra">
+    <div class="field"><label for="sheetN">«Осталось внести», ₽</label><input id="sheetN" type="text" inputmode="decimal" placeholder="если есть"></div>
+    <div class="field"><label for="sheetNd">до</label><input id="sheetNd" type="date"></div>
   </div>
+  <div class="field" id="dateField"><label for="sheetDate" id="sheetDateLabel">Дата</label><input id="sheetDate" type="date"></div>
   <div class="err" id="sheetErr"></div>
   <div class="actions">
     <button class="btn ghost" type="button" id="sheetCancel">Отмена</button>
@@ -375,325 +352,488 @@ input[type="date"] { min-height: 46px; }
 
 <script>
 (function () {
+  "use strict";
   const KEY = "kreditka-v1";
-  const DEFAULTS = {
-    v: 1,
-    startDebt: null, startDate: null,
-    cpAmount: null, cpDate: null,
-    goalDate: null,
-    incMin: 3000, incMax: 5000, intMin: 4, intMax: 5,
-    mode: "normal",
-    entries: [],
-    updatedAt: 0
-  };
   const $ = (id) => document.getElementById(id);
 
-  // ---------- dates & money ----------
+  // ---------- dates ----------
   const pad = (n) => String(n).padStart(2, "0");
   const todayISO = () => { const d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); };
+  const isDate = (v) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
   const toUTC = (iso) => { const [y, m, d] = iso.split("-").map(Number); return Date.UTC(y, m - 1, d); };
-  const days = (a, b) => Math.round((toUTC(b) - toUTC(a)) / 86400000); // b - a
+  const days = (a, b) => Math.round((toUTC(b) - toUTC(a)) / 86400000);
   const addDays = (iso, n) => { const t = new Date(toUTC(iso) + n * 86400000); return t.getUTCFullYear() + "-" + pad(t.getUTCMonth() + 1) + "-" + pad(t.getUTCDate()); };
-  const MONTHS = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
-  const MON_SHORT = ["янв","фев","мар","апр","мая","июн","июл","авг","сен","окт","ноя","дек"];
+  const monthOf = (iso) => iso.slice(0, 7);
+  const addMonths = (ym, n) => { const [y, m] = ym.split("-").map(Number); const t = y * 12 + (m - 1) + n; return Math.floor(t / 12) + "-" + pad(t % 12 + 1); };
+  const deadlineOf = (ym) => addDays(addMonths(ym, 4) + "-01", -1); // last day of month+3
+  const GEN = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+  const NOM = ["январь","февраль","март","апрель","май","июнь","июль","август","сентябрь","октябрь","ноябрь","декабрь"];
+  const SHORT = ["янв","фев","мар","апр","мая","июн","июл","авг","сен","окт","ноя","дек"];
   const WEEK = ["воскресенье","понедельник","вторник","среда","четверг","пятница","суббота"];
-  const human = (iso) => { const [y, m, d] = iso.split("-").map(Number); return d + " " + MONTHS[m - 1]; };
+  const human = (iso) => { const [, m, d] = iso.split("-").map(Number); return d + " " + GEN[m - 1]; };
+  const nomOf = (ym) => NOM[Number(ym.slice(5, 7)) - 1];
+  const genOf = (ym) => GEN[Number(ym.slice(5, 7)) - 1];
+  const calHtml = (iso, cls) => "<div class='cal " + (cls || "") + "'><b>" + Number(iso.slice(8, 10)) + "</b><span>" + SHORT[Number(iso.slice(5, 7)) - 1] + "</span></div>";
+
+  // ---------- numbers ----------
   const fmt0 = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });
   const fmt2 = new Intl.NumberFormat("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const rub = (n) => fmt0.format(Math.round(n)) + " ₽";
-  const rub2 = (n) => (Math.abs(n % 1) > 0.004 ? fmt2.format(n) : fmt0.format(n)) + " ₽";
-  const parseNum = (s) => { const v = parseFloat(String(s).replace(/\s| /g, "").replace(",", ".")); return isFinite(v) ? v : NaN; };
-  const plural = (n, a, b, c) => { const m10 = n % 10, m100 = n % 100; if (m10 === 1 && m100 !== 11) return a; if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return b; return c; };
+  const rub2 = (n) => (Math.abs(n - Math.round(n)) > 0.004 ? fmt2.format(n) : fmt0.format(Math.round(n))) + " ₽";
+  const r2 = (n) => Math.round(n * 100) / 100;
+  const parseNum = (s) => { const v = parseFloat(String(s).replace(/[\s ]/g, "").replace(",", ".")); return isFinite(v) ? v : NaN; };
+  const plural = (n, a, b, c) => { n = Math.abs(n); const m10 = n % 10, m100 = n % 100; if (m10 === 1 && m100 !== 11) return a; if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return b; return c; };
   const dayWord = (n) => n + " " + plural(n, "день", "дня", "дней");
+  const numStr = (v) => String(v).replace(".", ",");
 
   // ---------- state ----------
-  function normalize(raw) {
-    const s = Object.assign({}, DEFAULTS, raw || {});
-    s.entries = Array.isArray(s.entries) ? s.entries.filter(e => e && typeof e.a === "number" && /^\d{4}-\d{2}-\d{2}$/.test(e.d) && ["in","out","sync"].includes(e.t)).map(e => Object.assign({}, e)) : [];
-    if (!isDate(s.startDate)) s.startDate = todayISO();
+  const DEFAULTS = {
+    v: 2, startDate: null, buckets: [], goalDate: null,
+    incMin: 3000, incMax: 5000, intMin: 4, intMax: 5, mode: "normal",
+    feePct: 5.9, feeFix: 590, mp: null,
+    entries: [], backupAt: 0, updatedAt: 0
+  };
+
+  function initialBuckets(total, cpA, cpD, onDay) {
+    const cur = monthOf(onDay);
+    if (cpA > 0 && isDate(cpD)) {
+      const m = addMonths(monthOf(cpD), -3);
+      const a = r2(Math.min(cpA, total));
+      const rest = r2(total - a);
+      const out = [{ m, a }];
+      if (rest > 0.004) {
+        let m2 = addMonths(m, 1);
+        if (m2 > cur) m2 = m;
+        if (m2 === m) out[0].a = r2(out[0].a + rest); else out.push({ m: m2, a: rest });
+      }
+      return out;
+    }
+    return [{ m: cur, a: r2(total) }];
+  }
+
+  function migrate(raw) {
+    if (!raw || typeof raw !== "object") return {};
+    if (raw.v === 2) return raw;
+    const s = Object.assign({}, raw, { v: 2 });
+    s.buckets = (typeof raw.startDebt === "number" && raw.startDebt > 0)
+      ? initialBuckets(raw.startDebt, raw.cpAmount, raw.cpDate, isDate(raw.startDate) ? raw.startDate : todayISO())
+      : [];
+    if (!isDate(s.goalDate) && s.buckets.length) s.goalDate = deadlineOf(s.buckets[s.buckets.length - 1].m);
+    s.entries = Array.isArray(raw.entries) ? raw.entries.map((e) => e && e.t === "out" ? Object.assign({}, e, { k: "buy" }) : e) : [];
+    delete s.startDebt; delete s.cpAmount; delete s.cpDate;
     return s;
   }
-  function isDate(v) { return typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v); }
-  const configured = () => typeof state.startDebt === "number" && state.startDebt > 0 && isDate(state.goalDate);
-  const hasCp = () => typeof state.cpAmount === "number" && state.cpAmount > 0 && isDate(state.cpDate);
+
+  function normalize(raw) {
+    const s = Object.assign({}, DEFAULTS, migrate(raw));
+    s.buckets = Array.isArray(s.buckets) ? s.buckets.filter((b) => b && /^\d{4}-\d{2}$/.test(b.m) && typeof b.a === "number" && b.a >= 0).map((b) => ({ m: b.m, a: b.a })) : [];
+    s.entries = Array.isArray(s.entries) ? s.entries.filter((e) => e && typeof e.a === "number" && isFinite(e.a) && isDate(e.d) && ["in", "out", "sync"].includes(e.t)).map((e) => Object.assign({}, e)) : [];
+    if (!isDate(s.startDate)) s.startDate = todayISO();
+    if (!isDate(s.goalDate)) s.goalDate = null;
+    if (s.mp && !(typeof s.mp.a === "number" && isDate(s.mp.d))) s.mp = null;
+    for (const k of ["incMin", "incMax", "intMin", "intMax"]) if (!(typeof s[k] === "number" && s[k] > 0)) s[k] = DEFAULTS[k];
+    for (const k of ["feePct", "feeFix"]) if (!(typeof s[k] === "number" && s[k] >= 0)) s[k] = DEFAULTS[k];
+    if (s.mode !== "careful") s.mode = "normal";
+    return s;
+  }
+
   let state = normalize(null);
   try { const raw = localStorage.getItem(KEY); if (raw) state = normalize(JSON.parse(raw)); } catch (e) {}
+  const configured = () => state.buckets.length > 0;
+  const sorted = () => state.entries.slice().sort((x, y) => x.d < y.d ? -1 : x.d > y.d ? 1 : (x.ts || 0) - (y.ts || 0));
+  const avgInt = () => Math.max(1, (state.intMin + state.intMax) / 2);
+  const feeFor = (a) => r2(a * state.feePct / 100 + state.feeFix);
 
-  function sorted() { return state.entries.slice().sort((x, y) => x.d < y.d ? -1 : x.d > y.d ? 1 : (x.ts || 0) - (y.ts || 0)); }
+  // ---------- debt engine: monthly buckets ----------
+  // Payments go first to debt without grace (transfers/cash), then to the oldest month.
+  function replay(upto, skipOutOn) {
+    const b = {};
+    for (const x of state.buckets) b[x.m] = (b[x.m] || 0) + x.a;
+    let cash = 0, extra = 0;
+    const graceSum = () => Object.keys(b).reduce((s, k) => s + b[k], 0);
+    const total = () => cash + graceSum() - extra;
+    const pay = (a) => {
+      let left = a;
+      const c = Math.min(cash, left); cash -= c; left -= c;
+      for (const m of Object.keys(b).sort()) { if (left <= 0) break; const t = Math.min(b[m], left); b[m] -= t; left -= t; }
+      extra += left;
+    };
+    for (const e of sorted()) {
+      if (upto && e.d > upto) break;
+      if (e.t === "in") pay(e.a);
+      else if (e.t === "out") {
+        if (skipOutOn && e.d === skipOutOn) continue;
+        let amt = e.k === "cash" ? e.a + (e.fee || 0) : e.a;
+        const fe = Math.min(extra, amt); extra -= fe; amt -= fe;
+        if (amt > 0) { if (e.k === "cash") cash += amt; else { const m = monthOf(e.d); b[m] = (b[m] || 0) + amt; } }
+      } else if (e.t === "sync") {
+        const diff = e.a - total();
+        if (diff > 0) { const fe = Math.min(extra, diff); extra -= fe; const m = monthOf(e.d); b[m] = (b[m] || 0) + (diff - fe); }
+        else if (diff < 0) pay(-diff);
+        if (typeof e.n === "number" && isDate(e.nd)) {
+          const m = addMonths(monthOf(e.nd), -3);
+          const G = graceSum();
+          for (const k of Object.keys(b)) if (k < m) b[k] = 0;
+          const n = Math.min(e.n, G);
+          const later = Object.keys(b).filter((k) => k > m).sort();
+          const rest = G - n;
+          b[m] = n;
+          const laterSum = later.reduce((s, k) => s + b[k], 0);
+          if (rest > 0.004) {
+            if (!later.length) {
+              let m2 = addMonths(m, 1);
+              if (m2 > monthOf(e.d)) m2 = m;
+              b[m2] = (b[m2] || 0) + rest;
+            } else if (laterSum > 0) { const f = rest / laterSum; for (const k of later) b[k] *= f; }
+            else b[later[later.length - 1]] += rest;
+          } else for (const k of later) b[k] = 0;
+        }
+      }
+    }
+    for (const k of Object.keys(b)) { b[k] = r2(b[k]); if (b[k] < 0.005) delete b[k]; }
+    return { b, cash: r2(cash), extra: r2(Math.max(0, extra)), debt: r2(Math.max(0, total())) };
+  }
 
-  function compute() {
-    const today = todayISO();
-    const list = sorted();
-    let debt = state.startDebt || 0;
-    for (const e of list) { if (e.t === "in") debt -= e.a; else if (e.t === "out") debt += e.a; else debt = e.a; }
-    debt = Math.round(debt * 100) / 100;
-
-    const spentToday = list.filter(e => e.t === "out" && e.d === today).reduce((s, e) => s + e.a, 0);
-    const base = Math.max(0, debt + spentToday);
-
-    const T = isDate(state.goalDate) ? Math.max(0, days(today, state.goalDate) + 1) : 0;
-
-    // income rate per day
+  function rateOn(day) {
     const avgAmt = (state.incMin + state.incMax) / 2;
-    const avgInt = Math.max(1, (state.intMin + state.intMax) / 2);
-    const plannedNormal = avgAmt / avgInt;
-    const plannedCareful = state.incMin / Math.max(1, state.intMax);
-    const ins = list.filter(e => e.t === "in");
+    const planned = avgAmt / avgInt();
+    const careful = state.incMin / Math.max(1, state.intMax);
+    const ins = sorted().filter((e) => e.t === "in" && e.d <= day);
     let actual = null;
     if (ins.length >= 3) {
       const span = days(ins[0].d, ins[ins.length - 1].d);
       if (span >= 4) actual = (ins.reduce((s, e) => s + e.a, 0) - ins[ins.length - 1].a) / span;
     }
-    let rate, rateSrc;
     if (state.mode === "careful") {
-      rate = actual != null ? Math.min(actual, plannedCareful) : plannedCareful;
-      rateSrc = actual != null && actual < plannedCareful ? "по твоим пополнениям" : state.incMin + " ₽ раз в " + state.intMax + " дн.";
-    } else {
-      rate = actual != null ? actual : plannedNormal;
-      rateSrc = actual != null ? "по твоим пополнениям" : fmt0.format(avgAmt) + " ₽ раз в " + String(avgInt).replace(".", ",") + " дн.";
+      if (actual != null && actual < careful) return { r: actual, src: "по твоим пополнениям" };
+      return { r: careful, src: fmt0.format(state.incMin) + " ₽ раз в " + numStr(state.intMax) + " дн." };
     }
+    if (actual != null) return { r: actual, src: "по твоим пополнениям" };
+    return { r: planned, src: fmt0.format(avgAmt) + " ₽ раз в " + numStr(avgInt()) + " дн." };
+  }
 
-    const needPerDay = T > 0 ? base / T : base;
-    const limit = T > 0 ? rate - needPerDay : 0;
-    const left = limit - spentToday;
+  // How much must go to debt per day so that every month is paid by its deadline (and the goal, if set).
+  function needOn(day, snap) {
+    let need = 0, by = null, byDate = null, overdue = false;
+    const bump = (v, why, dt) => { if (v > need + 0.001) { need = v; by = why; byDate = dt; } };
+    if (snap.cash > 0) bump(snap.cash / avgInt(), "cash", null);
+    let cum = snap.cash;
+    for (const m of Object.keys(snap.b).sort()) {
+      cum += snap.b[m];
+      const dl = deadlineOf(m);
+      const T = days(day, dl) + 1;
+      if (T <= 0) overdue = true;
+      bump(cum / Math.max(1, T), "bucket", dl);
+    }
+    if (state.goalDate && state.goalDate >= day && snap.debt > 0) bump(snap.debt / (days(day, state.goalDate) + 1), "goal", state.goalDate);
+    return { need, by, byDate, overdue };
+  }
 
-    // checkpoint
-    const paidSince = list.filter(e => e.t === "in" && e.d >= state.startDate).reduce((s, e) => s + e.a, 0);
-    const cpLeft = Math.max(0, state.cpAmount - paidSince);
-    const cpDays = isDate(state.cpDate) ? Math.max(0, days(today, state.cpDate) + 1) : 0;
+  const spentOn = (day) => state.entries.filter((e) => e.t === "out" && e.d === day).reduce((s, e) => s + e.a + (e.k === "cash" ? (e.fee || 0) : 0), 0);
 
-    // next deposit
-    let nextIn = null;
-    if (ins.length) nextIn = addDays(ins[ins.length - 1].d, Math.round(avgInt));
+  function compute() {
+    const today = todayISO();
+    // Walk recent days: overspending is taken back over the next 4 days, not spread over the whole period.
+    const from = state.startDate > addDays(today, -30) ? state.startDate : addDays(today, -30);
+    const over = {};
+    let res = null;
+    for (let d = from; d <= today; d = addDays(d, 1)) {
+      const snap = replay(d, d);
+      const rate = rateOn(d);
+      const nd = needOn(d, snap);
+      let pen = 0;
+      for (let k = 1; k <= 4; k++) { const o = over[addDays(d, -k)]; if (o) pen += o / 4; }
+      const base = rate.r - nd.need;
+      const L = base - pen;
+      const spent = spentOn(d);
+      over[d] = Math.max(0, spent - Math.max(0, L));
+      if (d === today) res = { snap, rate, nd, base, pen, L, spent };
+    }
+    let penLeftDays = 0;
+    for (let k = 0; k <= 3; k++) if (over[addDays(today, -k)]) penLeftDays = Math.max(penLeftDays, 4 - k);
+    const now = replay();
+    const ins = sorted().filter((e) => e.t === "in");
+    const nextIn = ins.length ? addDays(ins[ins.length - 1].d, Math.round(avgInt())) : null;
+    return Object.assign({ today, now, nextIn, penLeftDays, left: res.L - res.spent }, res);
+  }
 
-    return { today, debt, spentToday, base, T, rate, rateSrc, needPerDay, limit, left, paidSince, cpLeft, cpDays, nextIn, actual, list };
+  function mpStatus(today) {
+    if (!state.mp) return null;
+    const paid = state.entries.filter((e) => e.t === "in" && (e.ts || 0) > (state.mp.ts || 0)).reduce((s, e) => s + e.a, 0);
+    const left = r2(Math.max(0, state.mp.a - paid));
+    const dl = days(today, state.mp.d);
+    return { left, dl, done: left <= 0.004, overdue: dl < 0 && left > 0.004, past: dl < 0 };
   }
 
   // ---------- render ----------
-  let showAll = false;
-  let armedId = null, armTimer = null;
+  let showAll = false, armedId = null, armTimer = null;
 
   function render() {
-    const c = compute();
     const now = new Date();
-    $("todayLabel").textContent = WEEK[now.getDay()] + ", " + human(c.today);
+    const today = todayISO();
+    $("todayLabel").textContent = WEEK[now.getDay()] + ", " + human(today);
     const ready = configured();
     $("setup").hidden = ready;
-    $("heroCard").hidden = !ready; $("debtCard").hidden = !ready; $("dlCard").hidden = !ready;
-    document.querySelector(".wrap > .actions").hidden = !ready;
-    if (ready) {
+    for (const id of ["heroCard", "mainActions", "mpCard", "debtCard", "dlCard", "alerts"]) $(id).hidden = !ready;
+    renderSettings();
+    renderHistory(today);
+    if (!ready) return;
+    const c = compute();
+    const mp = mpStatus(today);
+    renderAlerts(c, mp);
+    renderHero(c);
+    renderMp(c, mp);
+    renderDebt(c);
+    renderBuckets(c);
+  }
 
-    const pill = $("statusPill");
-    const meter = $("todayMeter");
-    const big = $("leftToday");
-    const sub = $("heroSub");
+  function renderAlerts(c, mp) {
+    const out = [];
+    if (mp && mp.overdue) out.push(["bad", "Обязательный платёж просрочен", "Внеси " + rub2(mp.left) + " как можно скорее. Иначе банк начислит неустойку и отменит беспроцентный период."]);
+    else if (mp && !mp.done && mp.dl <= 3) out.push(["warn", mp.dl === 0 ? "Сегодня последний день обязательного платежа" : "Обязательный платёж через " + dayWord(mp.dl), "Внеси " + rub2(mp.left) + " до " + human(state.mp.d) + ". Пропуск отменяет беспроцентный период."]);
+    if (c.now.cash > 0) out.push(["bad", "Долг без льготы: " + rub2(c.now.cash), "Это переводы, наличные и СБП. Проценты на них идут каждый день. Пополнения сначала гасят этот долг."]);
+    if (c.nd.overdue) out.push(["bad", "Срок по одному из месяцев прошёл", "Банк уже начисляет проценты. Нажми «Сверить с банком» и перепиши цифры из приложения."]);
+    if (!mp && c.now.debt > 0 && Number(c.today.slice(8, 10)) >= 2 && c.today >= addMonths(monthOf(state.startDate), 1) + "-02") out.push(["info", "Впиши обязательный платёж", "Банк считает его после 1-го числа. Сумма и дата есть в СберБанк Онлайн."]);
+    $("alerts").innerHTML = out.map(([k, t, d]) => "<div class='alert " + k + "'><b>" + t + "</b><span>" + d + "</span></div>").join("");
+    $("alerts").hidden = out.length === 0;
+  }
 
-    if (c.debt <= 0) {
-      big.innerHTML = "Долг закрыт";
-      big.style.fontSize = "40px";
-      pill.className = "pill good"; pill.textContent = "Свободен";
-      meter.hidden = true;
-      sub.innerHTML = "Тратить можно всё, что приходит. Новые покупки снова дадут беспроцентный период.";
-      $("formula").hidden = true;
-    } else if (c.T === 0) {
-      big.textContent = "0 ₽";
-      pill.className = "pill bad"; pill.textContent = "Срок прошёл";
-      meter.hidden = true;
-      sub.innerHTML = "Дата «закрыть весь долг» уже прошла. Поставь новую в настройках.";
-      $("formula").hidden = true;
-    } else {
-      big.style.fontSize = "";
-      meter.hidden = false;
-      $("formula").hidden = false;
-      const shown = Math.max(0, Math.floor(c.left));
-      big.innerHTML = fmt0.format(shown) + "<small>₽</small>";
-      const lim = Math.max(0, Math.floor(c.limit));
-      const pct = lim > 0 ? Math.min(100, c.spentToday / lim * 100) : (c.spentToday > 0 ? 100 : 0);
-      meter.firstElementChild.style.width = pct + "%";
-      meter.classList.toggle("over", c.left < 0);
-      if (c.limit <= 0) {
-        pill.className = "pill bad"; pill.textContent = "Только гасить";
-        sub.innerHTML = "Дохода не хватает, чтобы успеть к " + human(state.goalDate) + ". Лучше пока не тратить с карты.";
-      } else if (c.left < 0) {
-        pill.className = "pill bad"; pill.textContent = "Перерасход";
-        sub.innerHTML = "Лимит <b class='num'>" + rub(lim) + "</b>, потрачено <b class='num'>" + rub(c.spentToday) + "</b>. Перерасход <b class='num'>" + rub(-c.left) + "</b> — завтрашний лимит станет чуть меньше.";
-      } else if (c.spentToday > 0 && c.left < c.limit * 0.25) {
-        pill.className = "pill warn"; pill.textContent = "Почти всё";
-        sub.innerHTML = "Лимит на день <b class='num'>" + rub(lim) + "</b>, уже потрачено <b class='num'>" + rub(c.spentToday) + "</b>.";
-      } else {
-        pill.className = "pill good"; pill.textContent = "В графике";
-        sub.innerHTML = c.spentToday > 0
-          ? "Лимит на день <b class='num'>" + rub(lim) + "</b>, уже потрачено <b class='num'>" + rub(c.spentToday) + "</b>."
-          : "Лимит на день <b class='num'>" + rub(lim) + "</b>. Не потратил — завтра будет немного больше.";
-      }
-      $("formula").innerHTML =
-        "<span>Доход в среднем (" + c.rateSrc + ")</span><span>+" + rub(c.rate) + " / день</span>" +
-        "<span>На долг, чтобы закрыть всё к " + human(state.goalDate) + " (" + dayWord(c.T) + ")</span><span>−" + rub(c.needPerDay) + " / день</span>" +
-        "<span class='total'>Можно тратить</span><span class='total'>" + rub(Math.max(0, c.limit)) + " / день</span>";
-    }
+  function renderHero(c) {
+    const pill = $("statusPill"), big = $("leftToday"), sub = $("heroSub"), meter = $("todayMeter");
+    big.classList.remove("text");
     $("modeNormal").setAttribute("aria-pressed", state.mode !== "careful");
     $("modeCareful").setAttribute("aria-pressed", state.mode === "careful");
-    $("modeNormal").textContent = "Обычно: " + fmt0.format(state.incMin / 1000) + "–" + fmt0.format(state.incMax / 1000) + " тыс.";
+    $("modeNormal").textContent = "Обычно: " + numStr(state.incMin / 1000) + "–" + numStr(state.incMax / 1000) + " тыс.";
+    if (c.now.debt <= 0) {
+      big.textContent = "Долг закрыт"; big.classList.add("text");
+      pill.className = "pill good"; pill.textContent = "Свободен";
+      meter.hidden = true; $("formula").hidden = true;
+      sub.innerHTML = c.now.extra > 0 ? "На карте твои деньги: <b class='num'>" + rub2(c.now.extra) + "</b>." : "Тратить можно всё, что приходит.";
+      return;
+    }
+    meter.hidden = false; $("formula").hidden = false;
+    const lim = Math.max(0, Math.floor(c.L));
+    big.innerHTML = fmt0.format(Math.max(0, Math.floor(c.left))) + "<small>₽</small>";
+    meter.firstElementChild.style.width = (lim > 0 ? Math.min(100, c.spent / lim * 100) : (c.spent > 0 ? 100 : 0)) + "%";
+    meter.classList.toggle("over", c.left < 0);
+    if (c.L <= 0) {
+      pill.className = "pill bad"; pill.textContent = "Только гасить";
+      sub.innerHTML = c.pen > 0 && c.base > 0
+        ? "Сегодня лимит съел перерасход прошлых дней. Завтра станет легче."
+        : "Дохода не хватает, чтобы успеть к сроку. Лучше пока не тратить с карты.";
+    } else if (c.left < 0) {
+      pill.className = "pill bad"; pill.textContent = "Перерасход";
+      sub.innerHTML = "Лимит <b class='num'>" + rub(lim) + "</b>, потрачено <b class='num'>" + rub(c.spent) + "</b>. Перерасход <b class='num'>" + rub(-c.left) + "</b> вычтется из лимита следующих 4 дней.";
+    } else if (c.spent > 0 && c.left < c.L * 0.25) {
+      pill.className = "pill warn"; pill.textContent = "Почти всё";
+      sub.innerHTML = "Лимит на день <b class='num'>" + rub(lim) + "</b>, уже потрачено <b class='num'>" + rub(c.spent) + "</b>.";
+    } else {
+      pill.className = "pill good"; pill.textContent = "В графике";
+      sub.innerHTML = c.spent > 0
+        ? "Лимит на день <b class='num'>" + rub(lim) + "</b>, уже потрачено <b class='num'>" + rub(c.spent) + "</b>."
+        : "Лимит на день <b class='num'>" + rub(lim) + "</b>. Не потратил — завтра будет немного больше.";
+    }
+    const T = c.nd.byDate ? days(c.today, c.nd.byDate) + 1 : 0;
+    const why = c.nd.by === "goal" ? "закрыть всё к " + human(c.nd.byDate) + " (" + dayWord(T) + ")"
+      : c.nd.by === "bucket" ? "успеть к " + human(c.nd.byDate) + " (" + dayWord(Math.max(0, T)) + ")"
+      : c.nd.by === "cash" ? "погасить долг без льготы" : "успеть к срокам";
+    let rows = "<span>Доход в среднем (" + c.rate.src + ")</span><span>+" + rub(c.rate.r) + " / день</span>" +
+      "<span>На долг, чтобы " + why + "</span><span>−" + rub(c.nd.need) + " / день</span>";
+    if (c.pen > 0.5) rows += "<span>Перерасход прошлых дней (ещё " + dayWord(c.penLeftDays) + ")</span><span>−" + rub(c.pen) + "</span>";
+    rows += "<span class='total'>Можно тратить</span><span class='total'>" + rub(Math.max(0, c.L)) + " / день</span>";
+    $("formula").innerHTML = rows;
+  }
 
-    // debt card
-    $("debtNow").textContent = rub2(Math.max(0, c.debt));
-    const paidPct = state.startDebt > 0 ? Math.max(0, Math.min(100, (1 - Math.max(0, c.debt) / state.startDebt) * 100)) : 100;
-    $("debtMeter").firstElementChild.style.width = paidPct + "%";
-    $("debtPaid").textContent = c.debt < state.startDebt ? "Закрыто " + Math.round(paidPct) + "%" : (c.debt > state.startDebt ? "Долг вырос на " + rub(c.debt - state.startDebt) : "Начало пути");
-    $("debtStart").textContent = "было " + rub2(state.startDebt) + " на " + human(state.startDate);
+  function icsHref() {
+    const mp = state.mp;
+    const d = mp.d.replace(/-/g, ""), d2 = addDays(mp.d, 1).replace(/-/g, "");
+    const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+    const ics = [
+      "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Bahdor//RU", "CALSCALE:GREGORIAN",
+      "BEGIN:VEVENT", "UID:bahdor-mp-" + d + "@bahdor", "DTSTAMP:" + stamp,
+      "DTSTART;VALUE=DATE:" + d, "DTEND;VALUE=DATE:" + d2,
+      "SUMMARY:Обязательный платёж по кредитке " + rub2(mp.a).replace(/ | /g, " "),
+      "DESCRIPTION:Внеси до конца дня\\, иначе пропадёт беспроцентный период.",
+      "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:Обязательный платёж по кредитке", "TRIGGER:-PT39H", "END:VALARM",
+      "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:Обязательный платёж по кредитке", "TRIGGER:-PT15H", "END:VALARM",
+      "END:VEVENT", "END:VCALENDAR"
+    ].join("\r\n");
+    return "data:text/calendar;charset=utf-8," + encodeURIComponent(ics);
+  }
 
-    // deadlines
-    const dl = [];
-    const [gy, gm, gd] = state.goalDate.split("-").map(Number);
-    if (hasCp()) {
-      const [cy, cm, cd] = state.cpDate.split("-").map(Number);
-      const done = c.cpLeft <= 0;
-      const pct = state.cpAmount > 0 ? Math.min(100, c.paidSince / state.cpAmount * 100) : 100;
-      let pillHtml, note;
-      if (done) { pillHtml = "<span class='pill good'>Внесено</span>"; note = "Обязательная часть закрыта. Проценты за старые покупки не начислятся."; }
-      else if (c.cpDays === 0) { pillHtml = "<span class='pill bad'>Срок прошёл</span>"; note = "Не хватило " + rub2(c.cpLeft) + ". Проверь в приложении банка."; }
-      else {
-        const perDay = c.cpLeft / c.cpDays;
-        const ok = c.rate * c.cpDays >= c.cpLeft;
-        pillHtml = ok ? "<span class='pill good'>Успеваешь</span>" : "<span class='pill warn'>Впритык</span>";
-        const deposits = Math.max(1, Math.ceil(c.cpLeft / ((state.incMin + state.incMax) / 2)));
-        note = "Осталось " + dayWord(c.cpDays) + ", это ~" + rub(perDay) + " в день или примерно " + deposits + " " + plural(deposits, "пополнение", "пополнения", "пополнений") + ".";
-      }
-      dl.push("<div class='dl-item'><div class='cal'><b>" + cd + "</b><span>" + MON_SHORT[cm - 1] + "</span></div><div class='dl-body'>" +
-        "<div class='dl-title'><span class='num'>" + (done ? "Внести " + rub2(state.cpAmount) : "Осталось внести " + rub2(c.cpLeft)) + "</span>" + pillHtml + "</div>" +
+  function renderMp(c, mp) {
+    const body = $("mpBody");
+    const nextMonth = addMonths(monthOf(c.today), 1);
+    if (!mp) {
+      body.innerHTML = "<p class='note' style='margin:8px 0 12px'>Банк считает его после 1-го числа каждого месяца. Если не внести его вовремя, беспроцентный период пропадёт, даже если по плану всё хорошо.</p>" +
+        "<button class='btn ghost small' type='button' data-act='mp'>Вписать сумму и дату</button>";
+    } else if (mp.done && mp.past) {
+      body.innerHTML = "<div class='dl'><div class='dl-item'>" + calHtml(state.mp.d) + "<div class='dl-body'><div class='dl-title'><span>" + rub2(state.mp.a) + "</span><span class='pill good'>Внесён</span></div>" +
+        "<div class='note'>Следующий банк посчитает после 1 " + GEN[Number(nextMonth.slice(5, 7)) - 1] + ". Впиши его, когда появится.</div>" +
+        "<div class='btns'><button class='linkbtn' type='button' data-act='mp'>Вписать новый</button></div></div></div></div>";
+    } else {
+      let pill;
+      if (mp.done) pill = "<span class='pill good'>Внесён</span>";
+      else if (mp.overdue) pill = "<span class='pill bad'>Просрочен</span>";
+      else if (mp.dl <= 3) pill = "<span class='pill warn'>" + (mp.dl === 0 ? "Сегодня" : "Через " + dayWord(mp.dl)) + "</span>";
+      else pill = "<span class='pill mute'>Через " + dayWord(mp.dl) + "</span>";
+      const pct = state.mp.a > 0 ? Math.min(100, (state.mp.a - mp.left) / state.mp.a * 100) : 100;
+      const note = mp.done ? "Можно не беспокоиться до следующего месяца. Пополнения дальше гасят основной долг."
+        : "Осталось внести " + rub2(mp.left) + ". Пополнения, записанные после того, как ты вписал платёж, засчитываются сюда.";
+      body.innerHTML = "<div class='dl'><div class='dl-item'>" + calHtml(state.mp.d, mp.overdue ? "bad" : "") + "<div class='dl-body'>" +
+        "<div class='dl-title'><span class='num'>" + rub2(state.mp.a) + "</span>" + pill + "</div>" +
         "<div class='meter paid'><i style='width:" + pct + "%'></i></div>" +
-        "<div class='dl-note'>" + note + " Пополнения засчитываются с " + human(state.startDate) + ".</div></div></div>");
+        "<div class='note'>" + note + "</div>" +
+        "<div class='btns'>" + (mp.done ? "" : "<a class='linkbtn' href='" + icsHref() + "' download='platezh.ics'>Напомнить в Календаре</a>") +
+        "<button class='linkbtn' type='button' data-act='mp'>Изменить</button></div></div></div></div>";
     }
-    {
-      const debt = Math.max(0, c.debt);
-      let pillHtml;
-      if (debt <= 0) pillHtml = "<span class='pill good'>Закрыто</span>";
-      else if (c.T === 0) pillHtml = "<span class='pill bad'>Срок прошёл</span>";
-      else pillHtml = c.limit > 0 ? "<span class='pill good'>По плану</span>" : "<span class='pill bad'>Не хватает</span>";
-      dl.push("<div class='dl-item'><div class='cal'><b>" + gd + "</b><span>" + MON_SHORT[gm - 1] + "</span></div><div class='dl-body'>" +
-        "<div class='dl-title'><span class='num'>Закрыть весь долг: " + rub2(debt) + "</span>" + pillHtml + "</div>" +
-        "<div class='dl-note'>" + (c.T > 0 && debt > 0 ? "Это ~" + rub(debt / c.T) + " в день на " + dayWord(c.T) + ". " : "") +
-        "Если закрыть всё к " + human(state.goalDate) + ", процентов не будет вообще.</div></div></div>");
-    }
-    if (c.nextIn && c.debt > 0) {
-      const dn = days(c.today, c.nextIn);
-      const when = dn < 0 ? "уже должно было прийти (" + human(c.nextIn) + ")" : dn === 0 ? "ожидается сегодня" : dn === 1 ? "ожидается завтра" : "ожидается ~" + human(c.nextIn);
-      dl.push("<div class='dl-item'><div class='cal'><b>" + c.nextIn.split("-")[2].replace(/^0/, "") + "</b><span>" + MON_SHORT[Number(c.nextIn.split("-")[1]) - 1] + "</span></div><div class='dl-body'>" +
-        "<div class='dl-title'><span>Следующее пополнение</span></div><div class='dl-note'>" + when.charAt(0).toUpperCase() + when.slice(1) + ", раз в ~" + String((state.intMin + state.intMax) / 2).replace(".", ",") + " дн.</div></div></div>");
-    }
-    $("deadlines").innerHTML = dl.join("");
-    }
+  }
 
-    // history
-    const items = c.list.slice().reverse();
-    const shownItems = showAll ? items : items.slice(0, 12);
+  function renderDebt(c) {
+    const startTotal = state.buckets.reduce((s, b) => s + b.a, 0);
+    $("debtNow").textContent = rub2(c.now.debt);
+    const pct = startTotal > 0 ? Math.max(0, Math.min(100, (1 - c.now.debt / startTotal) * 100)) : 100;
+    $("debtMeter").firstElementChild.style.width = pct + "%";
+    $("debtPaid").textContent = c.now.extra > 0 ? "Свои деньги на карте: " + rub2(c.now.extra)
+      : c.now.debt < startTotal ? "Закрыто " + Math.round(pct) + "%" : c.now.debt > startTotal ? "Долг вырос на " + rub(c.now.debt - startTotal) : "Начало пути";
+    $("debtStart").textContent = "было " + rub2(startTotal) + " на " + human(state.startDate);
+  }
+
+  function renderBuckets(c) {
+    const items = [];
+    const b = c.now.b;
+    if (c.now.cash > 0) {
+      items.push("<div class='dl-item'><div class='cal bad'><b>!</b><span>сразу</span></div><div class='dl-body'>" +
+        "<div class='dl-title'><span class='num'>Переводы и наличные: " + rub2(c.now.cash) + "</span><span class='pill bad'>Проценты идут</span></div>" +
+        "<div class='note'>Беспроцентного периода нет, комиссия уже учтена. Гасится первым.</div></div></div>");
+    }
+    let cum = c.now.cash;
+    const months = Object.keys(b).sort();
+    for (const m of months) {
+      cum += b[m];
+      const dl = deadlineOf(m);
+      const T = days(c.today, dl) + 1;
+      let pill;
+      if (T <= 0) pill = "<span class='pill bad'>Просрочено</span>";
+      else pill = c.rate.r * T >= cum ? "<span class='pill good'>Успеваешь</span>" : "<span class='pill warn'>Впритык</span>";
+      const note = T > 0 ? "Вернуть до " + human(dl) + ": " + dayWord(T) + ", ~" + rub(b[m] / T) + " в день." : "Срок был " + human(dl) + ". Сверь долг с банком.";
+      items.push("<div class='dl-item'>" + calHtml(dl, T <= 0 ? "bad" : "") + "<div class='dl-body'>" +
+        "<div class='dl-title'><span class='num'>Покупки за " + nomOf(m) + ": " + rub2(b[m]) + "</span>" + pill + "</div>" +
+        "<div class='note'>" + note + "</div></div></div>");
+    }
+    if (c.nextIn && c.now.debt > 0) {
+      const dn = days(c.today, c.nextIn);
+      const when = dn < 0 ? "Уже должно было прийти (" + human(c.nextIn) + ")" : dn === 0 ? "Ожидается сегодня" : dn === 1 ? "Ожидается завтра" : "Ожидается ~" + human(c.nextIn);
+      items.push("<div class='dl-item'>" + calHtml(c.nextIn) + "<div class='dl-body'><div class='dl-title'><span>Следующее пополнение</span></div><div class='note'>" + when + ", раз в ~" + numStr(avgInt()) + " дн.</div></div></div>");
+    }
+    if (!months.length && !c.now.cash) items.push("<div class='empty'>Долга по покупкам нет.</div>");
+    $("buckets").innerHTML = items.join("");
+
+    const cur = monthOf(c.today);
+    let tip = "Покупки за " + nomOf(cur) + " нужно вернуть до " + human(deadlineOf(cur)) + ".";
+    const dom = Number(c.today.slice(8, 10));
+    const toNext = days(c.today, addMonths(cur, 1) + "-01");
+    if (dom >= 24) tip += " До 1 " + genOf(addMonths(cur, 1)) + " " + plural(toNext, "остался", "осталось", "осталось") + " " + dayWord(toNext) + ": крупную покупку выгоднее сделать после 1-го, срок будет на месяц дольше.";
+    if (state.goalDate) tip += state.goalDate >= c.today ? " Твоя цель — закрыть всё к " + human(state.goalDate) + "." : " Цель (" + human(state.goalDate) + ") прошла, считаю по срокам банка. Новую можно поставить в настройках.";
+    $("bucketTip").textContent = tip;
+  }
+
+  function renderHistory(today) {
+    const items = sorted().reverse();
+    const shown = showAll ? items : items.slice(0, 12);
     $("histEmpty").hidden = items.length > 0;
     $("btnMore").hidden = showAll || items.length <= 12;
     const ul = $("hist");
     ul.innerHTML = "";
-    for (const e of shownItems) {
+    for (const e of shown) {
       const li = document.createElement("li");
-      const label = e.t === "in" ? "Пополнение" : e.t === "out" ? "Трата" : "Сверка с банком";
-      const sign = e.t === "in" ? "+" : e.t === "out" ? "−" : "";
-      const icon = e.t === "in" ? "+" : e.t === "out" ? "−" : "=";
-      li.innerHTML = "<div class='ico " + e.t + "'>" + icon + "</div><div class='what'><div>" + label + "</div><div>" + human(e.d) + (e.d === c.today ? " · сегодня" : "") + "</div></div>" +
+      let label, icoCls, icon, sign, extra = "";
+      if (e.t === "in") { label = "Пополнение"; icoCls = "in"; icon = "+"; sign = "+"; }
+      else if (e.t === "out" && e.k === "cash") { label = "Перевод / наличные"; icoCls = "cash"; icon = "−"; sign = "−"; if (e.fee) extra = " · комиссия " + rub2(e.fee); }
+      else if (e.t === "out") { label = "Покупка"; icoCls = "out"; icon = "−"; sign = "−"; }
+      else { label = "Сверка с банком"; icoCls = "sync"; icon = "="; sign = ""; if (typeof e.n === "number" && isDate(e.nd)) extra = " · " + rub2(e.n) + " до " + human(e.nd); }
+      li.innerHTML = "<div class='ico " + icoCls + "'>" + icon + "</div><div class='what'><div>" + label + "</div><div>" + human(e.d) + (e.d === today ? " · сегодня" : "") + extra + "</div></div>" +
         "<div class='amt " + e.t + "'>" + sign + rub2(e.a) + "</div>";
       const del = document.createElement("button");
       del.type = "button"; del.className = "del" + (armedId === e.id ? " armed" : "");
       del.textContent = armedId === e.id ? "Удалить?" : "✕";
       del.setAttribute("aria-label", "Удалить запись");
       del.addEventListener("click", () => {
-        if (armedId === e.id) {
-          state.entries = state.entries.filter(x => x.id !== e.id);
-          armedId = null; clearTimeout(armTimer); save(); toast("Запись удалена");
-        } else {
-          armedId = e.id; clearTimeout(armTimer);
-          armTimer = setTimeout(() => { armedId = null; render(); }, 3000);
-          render();
-        }
+        if (armedId === e.id) { state.entries = state.entries.filter((x) => x.id !== e.id); armedId = null; clearTimeout(armTimer); save(); toast("Запись удалена"); }
+        else { armedId = e.id; clearTimeout(armTimer); armTimer = setTimeout(() => { armedId = null; render(); }, 3000); render(); }
       });
       li.appendChild(del);
       ul.appendChild(li);
     }
-
-    // settings fields (only if not focused)
-    const fields = { sStartDebt: state.startDebt, sStartDate: state.startDate, sCpAmount: state.cpAmount, sCpDate: state.cpDate, sGoalDate: state.goalDate, sIncMin: state.incMin, sIncMax: state.incMax, sIntMin: state.intMin, sIntMax: state.intMax };
-    for (const k in fields) { const el = $(k); if (document.activeElement !== el) el.value = typeof fields[k] === "number" ? String(fields[k]).replace(".", ",") : (fields[k] || ""); }
+    const ago = state.backupAt ? days(new Date(state.backupAt).toISOString().slice(0, 10), today) : null;
+    $("backupNag").textContent = items.length >= 5 && (ago === null || ago >= 7) ? "Давно нет копии" : "";
   }
 
-  // ---------- persistence ----------
-  let docRef = null, writing = false, dirty = false;
-  function setSync(kind, text) {
-    const el = $("syncState");
-    el.className = "sync " + (kind || "");
-    el.lastElementChild.textContent = text;
+  function renderSettings() {
+    const fields = { sGoalDate: state.goalDate || "", sIncMin: state.incMin, sIncMax: state.incMax, sIntMin: state.intMin, sIntMax: state.intMax, sFeePct: state.feePct, sFeeFix: state.feeFix };
+    for (const k in fields) { const el = $(k); if (document.activeElement !== el) el.value = typeof fields[k] === "number" ? numStr(fields[k]) : fields[k]; }
+    if (state.backupAt) {
+      const d = new Date(state.backupAt);
+      const iso = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+      $("backupInfo").textContent = "Последняя копия: " + human(iso) + ". Сохраняй раз в неделю в «Файлы» или себе в Telegram.";
+    } else $("backupInfo").textContent = "Копий ещё не было. Сохрани файл в «Файлы» или отправь себе в Telegram — если удалишь иконку или сменишь телефон, загрузишь его обратно.";
   }
-  function saveLocal() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+  // ---------- storage ----------
   function save() {
     state.updatedAt = Date.now();
-    saveLocal();
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast("Не получилось сохранить на телефоне"); }
     render();
-    pushRemote();
-  }
-  async function pushRemote() {
-    if (!docRef) return;
-    if (writing) { dirty = true; return; }
-    writing = true;
-    try { await docRef.set(JSON.parse(JSON.stringify(state))); setSync("ok", "Сохранено"); }
-    catch (e) { setSync("err", "Не сохранилось в облако"); }
-    writing = false;
-    if (dirty) { dirty = false; pushRemote(); }
-  }
-  async function initRemote() {
-    if (!window.claude || typeof window.claude.use !== "function") { setSync("", "Сохраняю на устройстве"); return; }
-    try {
-      const [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
-      if (!db || !user) { setSync("", "Сохраняю на устройстве"); return; }
-      const id = await user.id();
-      if (!id) { setSync("", "Сохраняю на устройстве"); return; }
-      docRef = db.doc("data/users/" + id + "/kreditka");
-      setSync("", "Загружаю…");
-      const timer = setTimeout(() => setSync("err", "Облако не отвечает, пишу на устройство"), 10000);
-      docRef.onSnapshot((snap) => {
-        if (snap.metadata && snap.metadata.hasPendingWrites) return;
-        clearTimeout(timer);
-        const fromCache = snap.metadata && snap.metadata.fromCache;
-        if (snap.exists) {
-          const data = snap.data() || {};
-          if ((data.updatedAt || 0) >= (state.updatedAt || 0)) { state = normalize(JSON.parse(JSON.stringify(data))); saveLocal(); render(); }
-          else if (!fromCache) pushRemote();
-        } else if (!fromCache && (state.updatedAt || state.entries.length)) {
-          pushRemote();
-        }
-        if (!fromCache) setSync("ok", "Сохранено");
-      }, () => { clearTimeout(timer); setSync("err", "Облако недоступно, пишу на устройство"); });
-    } catch (e) { setSync("", "Сохраняю на устройстве"); }
   }
 
   // ---------- sheet ----------
-  let sheetMode = "in";
+  let sheetMode = "in", outKind = "buy";
+  function setKind(k) {
+    outKind = k;
+    $("kindBuy").setAttribute("aria-pressed", k === "buy");
+    $("kindCash").setAttribute("aria-pressed", k === "cash");
+    updateFee();
+  }
+  function updateFee() {
+    const show = sheetMode === "out" && outKind === "cash";
+    $("feeLine").hidden = !show;
+    if (!show) return;
+    const a = parseNum($("sheetAmount").value);
+    const fee = isFinite(a) && a > 0 ? feeFor(a) : feeFor(0);
+    $("feeLine").innerHTML = isFinite(a) && a > 0
+      ? "<b>Комиссия ~" + rub2(fee) + "</b>, в долг уйдёт " + rub2(a + fee) + ". Беспроцентного периода нет: проценты начисляются с первого дня."
+      : "<b>Дорого:</b> комиссия " + numStr(state.feePct) + "% + " + rub(state.feeFix) + " и проценты с первого дня. Если можно — заплати картой в магазине.";
+  }
   function openSheet(mode) {
     sheetMode = mode;
-    const c = compute();
+    const c = configured() ? compute() : null;
+    const today = todayISO();
     const cfg = {
-      in: { title: "Пополнение", hint: "Сколько положил на кредитку. Всё это идёт в счёт долга.", chips: [state.incMin, Math.round((state.incMin + state.incMax) / 2), state.incMax], ok: "Записать" },
-      out: { title: "Трата с карты", hint: c.debt > 0 && c.T > 0 ? "Сегодня ещё можно " + rub(Math.max(0, c.left)) + "." : "Сколько потратил с кредитки.", chips: [100, 300, 500, 1000], ok: "Записать" },
-      sync: { title: "Сверка с банком", hint: "Впиши «Вся задолженность на сегодня» из приложения банка. Все расчёты пойдут от этой суммы.", chips: [], ok: "Сохранить" }
+      in: { title: "Пополнение", hint: "Сколько положил на кредитку. Всё это идёт в счёт долга.", chips: [state.incMin, Math.round((state.incMin + state.incMax) / 2), state.incMax], ok: "Записать", date: "Дата" },
+      out: { title: "Трата с карты", hint: c && c.now.debt > 0 ? "Сегодня ещё можно " + rub(Math.max(0, c.left)) + "." : "Сколько потратил с кредитки.", chips: [100, 300, 500, 1000], ok: "Записать", date: "Дата" },
+      sync: { title: "Сверка с банком", hint: "Перепиши из СберБанк Онлайн «Вся задолженность на сегодня» и, если есть, «Осталось внести … до …». Расчёт пойдёт от этих цифр.", chips: [], ok: "Сохранить", date: "Дата" },
+      mp: { title: "Обязательный платёж", hint: "Впиши, сколько осталось внести и до какого числа, как в приложении банка. Если уже внесён полностью, впиши 0.", chips: [], ok: "Сохранить", date: "Внести до" }
     }[mode];
     $("sheetTitle").textContent = cfg.title;
     $("sheetHint").textContent = cfg.hint;
     $("sheetOk").textContent = cfg.ok;
-    $("sheetAmount").value = mode === "sync" ? String(Math.max(0, c.debt)).replace(".", ",") : "";
-    $("sheetDate").value = c.today;
+    $("sheetDateLabel").textContent = cfg.date;
+    $("kindSeg").hidden = mode !== "out";
+    $("syncExtra").hidden = mode !== "sync";
+    $("sheetAmount").value = mode === "sync" && c ? numStr(c.now.debt) : mode === "mp" && state.mp && !mpStatus(today).past ? numStr(state.mp.a) : "";
+    $("sheetDate").value = mode === "mp" ? (state.mp && !mpStatus(today).past ? state.mp.d : "") : today;
+    $("sheetN").value = ""; $("sheetNd").value = "";
     $("sheetErr").textContent = "";
+    if (mode === "out") setKind("buy");
+    updateFee();
     const chips = $("sheetChips");
     chips.innerHTML = "";
     chips.hidden = cfg.chips.length === 0;
     for (const v of cfg.chips) {
-      const b = document.createElement("button");
-      b.type = "button"; b.className = "chip"; b.textContent = fmt0.format(v) + " ₽";
-      b.addEventListener("click", () => { $("sheetAmount").value = String(v); $("sheetAmount").focus(); });
-      chips.appendChild(b);
+      const btn = document.createElement("button");
+      btn.type = "button"; btn.className = "chip"; btn.textContent = fmt0.format(v) + " ₽";
+      btn.addEventListener("click", () => { $("sheetAmount").value = String(v); updateFee(); $("sheetAmount").focus(); });
+      chips.appendChild(btn);
     }
     $("scrim").hidden = false; $("sheet").hidden = false;
     requestAnimationFrame(() => { $("scrim").classList.add("show"); $("sheet").classList.add("show"); });
@@ -701,102 +841,181 @@ input[type="date"] { min-height: 46px; }
   }
   function closeSheet() {
     $("scrim").classList.remove("show"); $("sheet").classList.remove("show");
-    document.activeElement && document.activeElement.blur && document.activeElement.blur();
-    setTimeout(() => { $("scrim").hidden = true; $("sheet").hidden = true; }, 250);
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    setTimeout(() => { $("scrim").hidden = true; $("sheet").hidden = true; $("sheet").style.bottom = ""; }, 250);
   }
+  const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
   $("sheet").addEventListener("submit", (ev) => {
     ev.preventDefault();
+    const err = (m) => { $("sheetErr").textContent = m; };
     const a = parseNum($("sheetAmount").value);
-    const d = $("sheetDate").value || todayISO();
-    if (!isFinite(a) || a < 0 || (sheetMode !== "sync" && a === 0)) { $("sheetErr").textContent = "Впиши сумму цифрами, например 4000"; return; }
+    const d = $("sheetDate").value;
+    if (sheetMode === "mp") {
+      if (!isFinite(a) || a < 0) return err("Впиши сумму цифрами, например 680");
+      if (!isDate(d)) return err("Выбери дату, до которой нужно внести платёж");
+      state.mp = { a: r2(a), d, ts: Date.now() };
+      save(); closeSheet();
+      return toast(a > 0 ? "Платёж " + rub2(a) + " до " + human(d) + " записан" : "Записал: платёж внесён");
+    }
+    if (!isFinite(a) || a < 0 || (sheetMode !== "sync" && a === 0)) return err("Впиши сумму цифрами, например 4000");
+    const day = isDate(d) ? d : todayISO();
+    const entry = { id: newId(), t: sheetMode, a: r2(a), d: day, ts: Date.now() };
+    if (sheetMode === "out") { entry.k = outKind; if (outKind === "cash") entry.fee = feeFor(a); }
+    if (sheetMode === "sync") {
+      const nRaw = $("sheetN").value.trim();
+      if (nRaw) {
+        const n = parseNum(nRaw), nd = $("sheetNd").value;
+        if (!isFinite(n) || n < 0) return err("«Осталось внести» впиши цифрами или оставь пустым");
+        if (!isDate(nd)) return err("Выбери, до какого числа нужно внести " + rub2(n));
+        entry.n = r2(n); entry.nd = nd;
+      }
+    }
     const before = compute();
-    state.entries.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), t: sheetMode, a: Math.round(a * 100) / 100, d, ts: Date.now() });
-    save();
-    closeSheet();
+    state.entries.push(entry);
+    save(); closeSheet();
     const after = compute();
-    if (sheetMode === "in") toast("+" + rub2(a) + " · долг теперь " + rub2(Math.max(0, after.debt)));
-    else if (sheetMode === "out") toast(after.left >= 0 ? "Записал. Сегодня ещё можно " + rub(after.left) : "Записал. Перерасход " + rub(-after.left));
-    else toast("Долг сверен: " + rub2(a) + (Math.abs(after.debt - before.debt) >= 1 ? " (разница " + rub(after.debt - before.debt) + ")" : ""));
+    if (sheetMode === "in") toast("+" + rub2(a) + " · долг теперь " + rub2(after.now.debt));
+    else if (sheetMode === "out") toast(entry.k === "cash" ? "Записал с комиссией " + rub2(entry.fee) : after.left >= 0 ? "Записал. Сегодня ещё можно " + rub(after.left) : "Записал. Перерасход " + rub(-after.left));
+    else toast("Сверено: " + rub2(a) + (Math.abs(after.now.debt - before.now.debt) >= 1 ? " (разница " + rub(after.now.debt - before.now.debt) + ")" : ""));
   });
+  $("sheetAmount").addEventListener("input", updateFee);
+  $("kindBuy").addEventListener("click", () => setKind("buy"));
+  $("kindCash").addEventListener("click", () => setKind("cash"));
   $("sheetCancel").addEventListener("click", closeSheet);
   $("scrim").addEventListener("click", closeSheet);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("sheet").hidden) closeSheet(); });
+  // keep the sheet above the iPhone keyboard
+  if (window.visualViewport) {
+    const vv = window.visualViewport;
+    const fit = () => { if ($("sheet").hidden) return; const off = Math.max(0, window.innerHeight - vv.height - vv.offsetTop); $("sheet").style.bottom = off + "px"; };
+    vv.addEventListener("resize", fit); vv.addEventListener("scroll", fit);
+  }
 
   // ---------- toast ----------
   let toastTimer = null;
   function toast(msg) {
     const t = $("toast"); t.textContent = msg; t.classList.add("show");
-    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 2800);
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 3000);
   }
+
+  // ---------- backup ----------
+  async function exportBackup() {
+    const json = JSON.stringify(state, null, 1);
+    const name = "bahdor-" + todayISO() + ".json";
+    const mark = () => { state.backupAt = Date.now(); save(); toast("Копия сохранена"); };
+    let file = null;
+    try { file = new File([json], name, { type: "application/json" }); } catch (e) {}
+    if (file && navigator.canShare && navigator.share) {
+      try { if (navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: "Бахдор — копия" }); return mark(); } }
+      catch (e) { if (e && e.name === "AbortError") return; }
+    }
+    try {
+      const url = URL.createObjectURL(file || new Blob([json], { type: "application/json" }));
+      const a = document.createElement("a"); a.href = url; a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 8000);
+      mark();
+    } catch (e) { toast("Не получилось сохранить файл"); }
+  }
+  let pendingImport = null, importTimer = null;
+  function askImport() { $("importFile").value = ""; $("importFile").click(); }
+  $("importFile").addEventListener("change", () => {
+    const f = $("importFile").files && $("importFile").files[0];
+    if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      let data;
+      try { data = normalize(JSON.parse(String(rd.result))); } catch (e) { return toast("Это не файл копии Бахдора"); }
+      if (!data.buckets.length) return toast("В файле нет данных о долге");
+      if (!configured()) { state = data; save(); return toast("Копия загружена: " + data.entries.length + " " + plural(data.entries.length, "запись", "записи", "записей")); }
+      pendingImport = data;
+      $("btnImport").textContent = "Заменить данные? Нажми ещё раз";
+      $("settingsBox").open = true;
+      clearTimeout(importTimer);
+      importTimer = setTimeout(() => { pendingImport = null; $("btnImport").textContent = "Загрузить копию"; }, 8000);
+    };
+    rd.onerror = () => toast("Не получилось прочитать файл");
+    rd.readAsText(f);
+  });
+  $("btnImport").addEventListener("click", () => {
+    if (pendingImport) {
+      clearTimeout(importTimer);
+      state = pendingImport; pendingImport = null;
+      $("btnImport").textContent = "Загрузить копию";
+      save(); toast("Копия загружена");
+    } else askImport();
+  });
+  $("setupImport").addEventListener("click", askImport);
+  $("btnExport").addEventListener("click", exportBackup);
+
+  // ---------- setup ----------
+  $("setup").addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    const err = (m) => { $("setupErr").textContent = m; };
+    const debt = parseNum($("uDebt").value);
+    const cpA = $("uCpAmount").value.trim() ? parseNum($("uCpAmount").value) : null;
+    const cpD = $("uCpDate").value;
+    const goal = $("uGoal").value;
+    const nums = ["uIncMin", "uIncMax", "uIntMin", "uIntMax"].map((id) => parseNum($(id).value));
+    const today = todayISO();
+    if (!isFinite(debt) || debt <= 0) return err("Впиши долг цифрами, например 15000");
+    if (cpA !== null && (!isFinite(cpA) || cpA < 0)) return err("«Осталось внести» впиши цифрами или оставь пустым");
+    if (cpA && !isDate(cpD)) return err("Выбери, до какого числа нужно внести " + rub2(cpA));
+    if (cpA && cpD < today) return err("Эта дата уже прошла. Проверь число в приложении");
+    if (goal && (!isDate(goal) || goal < today)) return err("Дата цели должна быть в будущем");
+    if (nums.some((v) => !isFinite(v) || v <= 0)) return err("Доход и дни впиши цифрами");
+    err("");
+    const s = normalize(null);
+    s.startDate = today;
+    s.buckets = initialBuckets(debt, cpA || 0, cpD, today);
+    s.goalDate = goal || deadlineOf(s.buckets[s.buckets.length - 1].m);
+    s.incMin = Math.min(nums[0], nums[1]); s.incMax = Math.max(nums[0], nums[1]);
+    s.intMin = Math.min(nums[2], nums[3]); s.intMax = Math.max(nums[2], nums[3]);
+    s.backupAt = state.backupAt;
+    state = s;
+    save();
+    window.scrollTo(0, 0);
+    toast("Готово. Вот твой лимит на сегодня");
+  });
 
   // ---------- wiring ----------
   $("btnIn").addEventListener("click", () => openSheet("in"));
   $("btnOut").addEventListener("click", () => openSheet("out"));
   $("btnSync").addEventListener("click", () => openSheet("sync"));
+  $("mpBody").addEventListener("click", (e) => { const t = e.target.closest("[data-act='mp']"); if (t) openSheet("mp"); });
   $("btnMore").addEventListener("click", () => { showAll = true; render(); });
   $("modeNormal").addEventListener("click", () => { if (state.mode !== "normal") { state.mode = "normal"; save(); } });
   $("modeCareful").addEventListener("click", () => { if (state.mode !== "careful") { state.mode = "careful"; save(); } });
 
   const numField = (id, key, min) => $(id).addEventListener("change", () => {
     const v = parseNum($(id).value);
-    if (isFinite(v) && v >= (min || 0)) { state[key] = Math.round(v * 100) / 100; save(); } else render();
+    if (isFinite(v) && v >= min) { state[key] = r2(v); save(); } else render();
   });
-  const dateField = (id, key) => $(id).addEventListener("change", () => {
-    const v = $(id).value;
-    if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { state[key] = v; save(); } else render();
-  });
-  numField("sStartDebt", "startDebt", 0); dateField("sStartDate", "startDate");
-  numField("sCpAmount", "cpAmount", 0); dateField("sCpDate", "cpDate"); dateField("sGoalDate", "goalDate");
   numField("sIncMin", "incMin", 1); numField("sIncMax", "incMax", 1); numField("sIntMin", "intMin", 1); numField("sIntMax", "intMax", 1);
-
-  $("setup").addEventListener("submit", (ev) => {
-    ev.preventDefault();
-    const err = (m) => { $("setupErr").textContent = m; };
-    const debt = parseNum($("uDebt").value);
-    const goal = $("uGoal").value;
-    const cpA = $("uCpAmount").value.trim() ? parseNum($("uCpAmount").value) : null;
-    const cpD = $("uCpDate").value;
-    const nums = ["uIncMin", "uIncMax", "uIntMin", "uIntMax"].map((id) => parseNum($(id).value));
-    if (!isFinite(debt) || debt <= 0) return err("Впиши долг цифрами, например 15000");
-    if (!isDate(goal)) return err("Выбери дату, до которой действует беспроцентный период");
-    if (goal < todayISO()) return err("Дата беспроцентного периода уже прошла");
-    if (cpA !== null && (!isFinite(cpA) || cpA < 0)) return err("«Осталось внести» впиши цифрами или оставь пустым");
-    if (cpA && !isDate(cpD)) return err("Выбери, до какого числа нужно внести " + rub2(cpA));
-    if (nums.some((v) => !isFinite(v) || v <= 0)) return err("Доход и дни впиши цифрами");
-    err("");
-    state.startDebt = Math.round(debt * 100) / 100;
-    state.startDate = todayISO();
-    state.goalDate = goal;
-    state.cpAmount = cpA ? Math.round(cpA * 100) / 100 : null;
-    state.cpDate = cpA ? cpD : null;
-    state.incMin = Math.min(nums[0], nums[1]); state.incMax = Math.max(nums[0], nums[1]);
-    state.intMin = Math.min(nums[2], nums[3]); state.intMax = Math.max(nums[2], nums[3]);
-    save();
-    window.scrollTo(0, 0);
-    toast("Готово. Вот твой лимит на сегодня");
-  });
+  numField("sFeePct", "feePct", 0); numField("sFeeFix", "feeFix", 0);
+  $("sGoalDate").addEventListener("change", () => { const v = $("sGoalDate").value; state.goalDate = isDate(v) ? v : null; save(); });
 
   let resetArmed = false, resetTimer = null;
   $("btnReset").addEventListener("click", () => {
     if (!resetArmed) {
-      resetArmed = true; $("btnReset").textContent = "Точно стереть? Нажми ещё раз";
-      resetTimer = setTimeout(() => { resetArmed = false; $("btnReset").textContent = "Стереть все записи"; }, 3500);
+      resetArmed = true; $("btnReset").textContent = "Стереть всё? Нажми ещё раз";
+      resetTimer = setTimeout(() => { resetArmed = false; $("btnReset").textContent = "Начать заново"; }, 3500);
       return;
     }
-    clearTimeout(resetTimer); resetArmed = false; $("btnReset").textContent = "Стереть все записи";
-    state.entries = []; save(); toast("Записи стёрты, настройки остались");
+    clearTimeout(resetTimer); resetArmed = false; $("btnReset").textContent = "Начать заново";
+    const keep = state.backupAt;
+    state = normalize(null); state.backupAt = keep;
+    save(); $("settingsBox").open = false; window.scrollTo(0, 0);
+    toast("Всё стёрто. Настрой заново");
   });
 
-  // re-render when the day changes or app comes back
   document.addEventListener("visibilitychange", () => { if (!document.hidden) render(); });
   setInterval(render, 60000);
-
   render();
-  initRemote();
+  if ("serviceWorker" in navigator) window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+
 })();
-</script>
-<script>
-if ("serviceWorker" in navigator) { window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); }); }
 </script>
 </body>
 </html>
