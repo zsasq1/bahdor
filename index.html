@@ -159,6 +159,67 @@ header.top .date { color: var(--muted); font-size: 13px; text-align: right; }
 .btns { display: flex; gap: 18px; flex-wrap: wrap; }
 .tip { font-size: 13px; color: var(--muted); padding-top: 12px; border-top: 1px dashed var(--line); }
 
+/* calendar */
+.cal-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.cal-title { font-family: var(--serif); font-size: 22px; font-weight: 500; letter-spacing: -.01em; margin-top: 2px; }
+.cal-nav { display: flex; gap: 6px; flex: none; }
+.icon-btn {
+  appearance: none; border: 1px solid var(--line); background: var(--card); color: var(--fg); font: inherit; font-size: 13px; font-weight: 500;
+  min-width: 36px; height: 36px; padding: 0 10px; border-radius: 10px; display: grid; place-items: center; cursor: pointer;
+  transition: transform var(--t-press) var(--ease-out), background-color var(--t-ui) ease, opacity var(--t-ui) ease;
+}
+.icon-btn svg { width: 18px; height: 18px; }
+.icon-btn#calPrev, .icon-btn#calNext { padding: 0; }
+.icon-btn:active:not(:disabled) { transform: scale(0.97); }
+.icon-btn:disabled { opacity: .35; cursor: default; }
+.wk, .cgrid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.wk { font-size: 11px; color: var(--muted); text-align: center; letter-spacing: .05em; text-transform: uppercase; margin-bottom: 4px; }
+.cgrid { touch-action: pan-y; }
+.day {
+  appearance: none; border: 1.5px solid transparent; background: transparent; font: inherit; color: var(--fg);
+  border-radius: 12px; min-height: 50px; padding: 6px 0 6px; min-width: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 4px;
+  cursor: pointer; font-variant-numeric: tabular-nums; font-size: 15px;
+  transition: transform var(--t-press) var(--ease-out), background-color var(--t-ui) ease, border-color var(--t-ui) ease, color var(--t-ui) ease;
+}
+.day:active { transform: scale(0.97); }
+.day .n { min-width: 26px; height: 22px; padding: 0 4px; border-radius: 99px; display: grid; place-items: center; line-height: 1; }
+.day.pre { color: var(--muted); }
+.day.past:not(.ok):not(.over) { color: var(--muted); }
+.day.ok { background: var(--good-soft); }
+.day.over { background: var(--bad-soft); }
+.day.wkend .n { color: var(--muted); }
+.day.today .n { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.day[aria-pressed="true"] { border-color: var(--fg); }
+.blank { min-height: 50px; }
+.marks { display: flex; gap: 3px; height: 6px; align-items: center; justify-content: center; }
+.m { display: inline-block; width: 6px; height: 6px; border-radius: 50%; flex: none; }
+.m.in { background: var(--good); }
+.m.buy { background: var(--accent); }
+.m.cash { background: var(--bad); border-radius: 1px; width: 5px; height: 5px; transform: rotate(45deg); }
+.m.exp { box-shadow: inset 0 0 0 1.5px var(--good); }
+.m.mp { background: var(--warn); border-radius: 2px; }
+.m.dl { box-shadow: inset 0 0 0 1.5px var(--bad); border-radius: 2px; }
+.m.goal { background: var(--fg); border-radius: 2px; }
+.sw { display: inline-block; width: 12px; height: 12px; border-radius: 4px; }
+.sw.ok { background: var(--good-soft); box-shadow: inset 0 0 0 1px var(--good); }
+.sw.over { background: var(--bad-soft); box-shadow: inset 0 0 0 1px var(--bad); }
+.cal-sum { font-size: 13px; color: var(--muted); margin-top: 10px; }
+.cal-sum b { color: var(--fg); font-weight: 600; }
+.day-info { margin-top: 12px; padding: 14px; border-radius: 14px; background: var(--card-2); display: flex; flex-direction: column; gap: 8px; }
+.day-info h3 { margin: 0; font-size: 15px; font-weight: 600; }
+.di-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 14px; flex-wrap: wrap; }
+.di-list { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.di-list div { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.di-list .amt { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.di-list .amt.in { color: var(--good); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; color: var(--muted); margin-top: 12px; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+@media (hover: hover) and (pointer: fine) {
+  .day:not(.ok):not(.over):hover { background: var(--card-2); }
+  .icon-btn:hover:not(:disabled) { background: var(--card-2); }
+}
+
 .hist { list-style: none; margin: 8px 0 0; padding: 0; }
 .hist li { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding-block: 10px; border-top: 1px solid var(--line); }
 .hist li:first-child { border-top: 0; }
@@ -239,7 +300,7 @@ input[type="date"] { min-height: 46px; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 @media (prefers-reduced-motion: reduce) {
   /* keep fades that explain state, drop movement */
-  .btn:active, .chip:active, .seg button:active { transform: none; }
+  .btn:active, .chip:active, .seg button:active, .day:active, .icon-btn:active:not(:disabled) { transform: none; }
   .seg::before { transition: none; }
   .sheet { transform: none; opacity: 0; transition: opacity var(--t-ui) ease; }
   .sheet.show { opacity: 1; }
@@ -314,6 +375,34 @@ input[type="date"] { min-height: 46px; }
   <section class="card" id="mpCard" aria-labelledby="mpLabel">
     <div class="label" id="mpLabel">Обязательный платёж</div>
     <div id="mpBody"></div>
+  </section>
+
+  <section class="card" id="calCard" aria-labelledby="calTitle">
+    <div class="cal-head">
+      <div>
+        <div class="label">Календарь</div>
+        <div class="cal-title" id="calTitle" aria-live="polite">—</div>
+      </div>
+      <div class="cal-nav">
+        <button class="icon-btn" type="button" id="calPrev" aria-label="Предыдущий месяц"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <button class="icon-btn" type="button" id="calToday" aria-label="К сегодняшнему дню">Сегодня</button>
+        <button class="icon-btn" type="button" id="calNext" aria-label="Следующий месяц"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+    <div class="wk" aria-hidden="true"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>
+    <div class="cgrid" id="calGrid"></div>
+    <div class="cal-sum" id="calSum"></div>
+    <div class="day-info" id="dayInfo"></div>
+    <div class="legend" aria-hidden="true">
+      <span><i class="m in"></i>пополнение</span>
+      <span><i class="m buy"></i>покупка</span>
+      <span><i class="m cash"></i>перевод</span>
+      <span><i class="m exp"></i>ждём доход</span>
+      <span><i class="m mp"></i>платёж</span>
+      <span><i class="m dl"></i>срок банка</span>
+      <span><i class="sw ok"></i>в лимите</span>
+      <span><i class="sw over"></i>перерасход</span>
+    </div>
   </section>
 
   <section class="card" id="debtCard" aria-labelledby="debtLabel">
@@ -602,12 +691,14 @@ input[type="date"] { min-height: 46px; }
 
   const spentOn = (day) => state.entries.filter((e) => e.t === "out" && e.d === day).reduce((s, e) => s + e.a + (e.k === "cash" ? (e.fee || 0) : 0), 0);
 
-  function compute() {
-    const today = todayISO();
-    // Walk recent days: overspending is taken back over the next 4 days, not spread over the whole period.
-    const from = state.startDate > addDays(today, -30) ? state.startDate : addDays(today, -30);
-    const over = {};
-    let res = null;
+  // Day-by-day limits from the first day of tracking. Overspending is taken back over the next 4 days, not spread over the whole period.
+  let histCache = { key: null };
+  function history(today) {
+    const key = state.updatedAt + "|" + today + "|" + state.entries.length + "|" + state.mode;
+    if (histCache.key === key) return histCache;
+    const lo = addDays(today, -400);
+    const from = state.startDate > lo ? state.startDate : lo;
+    const over = {}, map = {};
     for (let d = from; d <= today; d = addDays(d, 1)) {
       const snap = replay(d, d);
       const rate = rateOn(d);
@@ -618,8 +709,17 @@ input[type="date"] { min-height: 46px; }
       const L = base - pen;
       const spent = spentOn(d);
       over[d] = Math.max(0, spent - Math.max(0, L));
-      if (d === today) res = { snap, rate, nd, base, pen, L, spent };
+      map[d] = d === today ? { snap, rate, nd, base, pen, L, spent } : { base, pen, L, spent, debt: snap.debt };
     }
+    histCache = { key, map, over };
+    return histCache;
+  }
+
+  function compute() {
+    const today = todayISO();
+    const H = history(today);
+    const over = H.over;
+    const res = H.map[today];
     let penLeftDays = 0;
     for (let k = 0; k <= 3; k++) if (over[addDays(today, -k)]) penLeftDays = Math.max(penLeftDays, 4 - k);
     const now = replay();
@@ -645,7 +745,7 @@ input[type="date"] { min-height: 46px; }
     $("todayLabel").textContent = WEEK[now.getDay()] + ", " + human(today);
     const ready = configured();
     $("setup").hidden = ready;
-    for (const id of ["heroCard", "mainActions", "mpCard", "debtCard", "dlCard", "alerts"]) $(id).hidden = !ready;
+    for (const id of ["heroCard", "mainActions", "mpCard", "calCard", "debtCard", "dlCard", "alerts"]) $(id).hidden = !ready;
     renderSettings();
     renderHistory(today);
     if (!ready) return;
@@ -654,6 +754,7 @@ input[type="date"] { min-height: 46px; }
     renderAlerts(c, mp);
     renderHero(c);
     renderMp(c, mp);
+    renderCalendar(c);
     renderDebt(c);
     renderBuckets(c);
   }
@@ -779,6 +880,187 @@ input[type="date"] { min-height: 46px; }
     const i = $("mpBody").querySelector(".meter > i");
     if (i && fromClip && fromClip !== i.style.clipPath) anim(i, [{ clipPath: fromClip }, { clipPath: i.style.clipPath }], { duration: 300, easing: EASE_OUT, delay: settleDelay, fill: "backwards" });
   }
+
+  // ---------- calendar ----------
+  let calYm = null, calSel = null, calDir = 0, calInfoFor = null;
+  const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+  const monthLen = (ym) => Number(addDays(addMonths(ym, 1) + "-01", -1).slice(8, 10));
+  const weekdayMon = (iso) => (new Date(toUTC(iso)).getUTCDay() + 6) % 7;
+
+  function calEvents(c) {
+    const ev = {};
+    const add = (d, k, t) => { (ev[d] = ev[d] || []).push({ k, t }); };
+    if (state.mp) {
+      const mp = mpStatus(c.today);
+      add(state.mp.d, "mp", "Обязательный платёж " + rub2(state.mp.a) + (mp.done ? ": внесён" : ": осталось " + rub2(mp.left)));
+    }
+    for (const m of Object.keys(c.now.b)) add(deadlineOf(m), "dl", "Срок банка: покупки за " + nomOf(m) + ", " + rub2(c.now.b[m]));
+    if (c.now.cash > 0) add(c.today, "dl", "Переводы и наличные: " + rub2(c.now.cash) + ", проценты уже идут");
+    if (state.goalDate && c.now.debt > 0) add(state.goalDate, "goal", "Твоя цель: закрыть весь долг");
+    const ins = sorted().filter((e) => e.t === "in");
+    if (ins.length && c.now.debt > 0) {
+      const last = ins[ins.length - 1].d;
+      for (let k = 1; k <= 40; k++) {
+        const d = addDays(last, Math.round(k * avgInt()));
+        if (d <= c.today) continue;
+        if (days(c.today, d) > 120) break;
+        add(d, "exp", "Ожидается пополнение ~" + rub((state.incMin + state.incMax) / 2));
+      }
+    }
+    return ev;
+  }
+
+  function renderCalendar(c) {
+    const today = c.today;
+    const H = history(today).map;
+    const ev = calEvents(c);
+    const minYm = monthOf(state.startDate) < monthOf(today) ? monthOf(state.startDate) : monthOf(today);
+    let maxYm = addMonths(monthOf(today), 1);
+    for (const d of Object.keys(ev)) if (monthOf(d) > maxYm) maxYm = monthOf(d);
+    if (maxYm > addMonths(monthOf(today), 12)) maxYm = addMonths(monthOf(today), 12);
+    if (!calYm) calYm = monthOf(today);
+    if (calYm < minYm) calYm = minYm;
+    if (calYm > maxYm) calYm = maxYm;
+    if (!calSel || monthOf(calSel) !== calYm) calSel = calYm === monthOf(today) ? today : calYm + "-01";
+
+    $("calTitle").textContent = cap(NOM[Number(calYm.slice(5, 7)) - 1]) + (calYm.slice(0, 4) !== today.slice(0, 4) ? " " + calYm.slice(0, 4) : "");
+    $("calPrev").disabled = calYm <= minYm;
+    $("calNext").disabled = calYm >= maxYm;
+    $("calToday").hidden = calYm === monthOf(today) && calSel === today;
+
+    const byDay = {};
+    for (const e of state.entries) (byDay[e.d] = byDay[e.d] || []).push(e);
+
+    const cells = [];
+    for (let i = weekdayMon(calYm + "-01"); i > 0; i--) cells.push("<div class='blank'></div>");
+    const n = monthLen(calYm);
+    let okDays = 0, overDays = 0, spentSum = 0, inSum = 0;
+    for (let i = 1; i <= n; i++) {
+      const d = calYm + "-" + pad(i);
+      const cls = ["day"];
+      const h = H[d];
+      const wd = weekdayMon(d);
+      if (wd >= 5) cls.push("wkend");
+      if (d === today) cls.push("today");
+      if (d < state.startDate) cls.push("pre");
+      else if (d < today) cls.push("past");
+      let state_ = "";
+      if (h && d <= today && c.now.debt + 1 > 0) {
+        const lim = Math.max(0, h.L);
+        const isOver = h.spent > lim + 0.5;
+        if (d < today || isOver) { cls.push(isOver ? "over" : "ok"); state_ = isOver ? "перерасход" : "в лимите"; }
+        if (d < today) { if (isOver) overDays++; else okDays++; }
+      }
+      const list = byDay[d] || [];
+      for (const e of list) { if (e.t === "in") inSum += e.a; if (e.t === "out") spentSum += e.a + (e.k === "cash" ? (e.fee || 0) : 0); }
+      const kinds = [];
+      for (const x of (ev[d] || [])) if (!kinds.includes(x.k)) kinds.push(x.k);
+      if (list.some((e) => e.t === "in")) kinds.push("in");
+      if (list.some((e) => e.t === "out" && e.k === "cash")) kinds.push("cash");
+      if (list.some((e) => e.t === "out" && e.k !== "cash")) kinds.push("buy");
+      const order = ["mp", "dl", "goal", "in", "cash", "buy", "exp"];
+      const marks = kinds.sort((a, b) => order.indexOf(a) - order.indexOf(b)).slice(0, 4).map((k) => "<i class='m " + k + "'></i>").join("");
+      const label = human(d) + (d === today ? ", сегодня" : "") + (state_ ? ", " + state_ : "") + ((ev[d] || []).length ? ", есть события" : "");
+      cells.push("<button type='button' class='" + cls.join(" ") + "' data-d='" + d + "' aria-pressed='" + (d === calSel) + "' aria-label='" + label + "'><span class='n'>" + i + "</span><span class='marks'>" + marks + "</span></button>");
+    }
+    const grid = $("calGrid");
+    const html = cells.join("");
+    if (grid.dataset.v !== html) { grid.innerHTML = html; grid.dataset.v = html; }
+    if (calDir) {
+      anim(grid, reduce() ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: "translateX(" + (calDir * 16) + "px)" }, { opacity: 1, transform: "none" }], { duration: 220, easing: EASE_OUT });
+      anim($("calTitle"), [{ opacity: 0 }, { opacity: 1 }], { duration: 220, easing: EASE_OUT });
+      calDir = 0;
+    }
+
+    // month summary
+    let sum;
+    if (calYm > monthOf(today)) {
+      const evs = Object.keys(ev).filter((d) => monthOf(d) === calYm);
+      const dl = evs.filter((d) => ev[d].some((x) => x.k === "dl")).length;
+      const mpN = evs.filter((d) => ev[d].some((x) => x.k === "mp")).length;
+      sum = dl || mpN ? "В этом месяце: " + (dl ? "<b>" + dl + "</b> " + plural(dl, "срок", "срока", "сроков") + " банка" : "") + (dl && mpN ? ", " : "") + (mpN ? "обязательный платёж" : "") + "." : "Сроков банка в этом месяце нет.";
+    } else if (okDays + overDays === 0 && !spentSum && !inSum) {
+      sum = calYm === monthOf(today) ? "Месяц только начался для учёта." : "В этом месяце учёта ещё не было.";
+    } else {
+      sum = (okDays + overDays ? "В лимите <b>" + okDays + " из " + (okDays + overDays) + "</b> " + plural(okDays + overDays, "дня", "дней", "дней") + " · " : "") +
+        "потрачено <b>" + rub(spentSum) + "</b> · внесено <b>" + rub(inSum) + "</b>";
+    }
+    $("calSum").innerHTML = sum;
+
+    renderDayInfo(c, H, ev, byDay);
+  }
+
+  function renderDayInfo(c, H, ev, byDay) {
+    const d = calSel, today = c.today;
+    const parts = [];
+    const wdName = WEEK[new Date(toUTC(d)).getUTCDay()];
+    parts.push("<h3>" + cap(wdName) + ", " + human(d) + (d === today ? " · сегодня" : "") + "</h3>");
+    const h = H[d];
+    if (d < state.startDate) parts.push("<div class='note'>До начала учёта.</div>");
+    else if (h && d <= today) {
+      const lim = Math.max(0, Math.floor(h.L));
+      const isOver = h.spent > lim + 0.5;
+      const pill = d === today
+        ? (isOver ? "<span class='pill bad'>Перерасход " + rub(h.spent - lim) + "</span>" : "<span class='pill good'>Осталось " + rub(lim - h.spent) + "</span>")
+        : (isOver ? "<span class='pill bad'>Перерасход " + rub(h.spent - lim) + "</span>" : "<span class='pill good'>В лимите</span>");
+      parts.push("<div class='di-row'><span class='num'>Лимит " + rub(lim) + " · потрачено " + rub(h.spent) + "</span>" + pill + "</div>");
+    } else if (d > today && c.now.debt > 0) {
+      parts.push("<div class='di-row'><span class='num'>План: ~" + rub(Math.max(0, c.base)) + " в день</span><span class='pill mute'>прогноз</span></div>");
+    }
+    const list = (byDay[d] || []).slice().sort((a, b) => (a.ts || 0) - (b.ts || 0));
+    const rows = [];
+    for (const e of list) {
+      if (e.t === "in") rows.push("<div><i class='m in'></i>Пополнение<span class='amt in'>+" + rub2(e.a) + "</span></div>");
+      else if (e.t === "out" && e.k === "cash") rows.push("<div><i class='m cash'></i>Перевод / наличные<span class='amt'>−" + rub2(e.a + (e.fee || 0)) + "</span></div>");
+      else if (e.t === "out") rows.push("<div><i class='m buy'></i>Покупка<span class='amt'>−" + rub2(e.a) + "</span></div>");
+      else rows.push("<div><i class='m goal'></i>Сверка с банком<span class='amt'>" + rub2(e.a) + "</span></div>");
+    }
+    for (const x of (ev[d] || [])) rows.push("<div><i class='m " + x.k + "'></i><span>" + x.t + "</span></div>");
+    if (d > today && Number(d.slice(8, 10)) === 1) rows.push("<div><i class='m buy'></i><span>С этого дня покупки беспроцентные до " + human(deadlineOf(monthOf(d))) + "</span></div>");
+    parts.push(rows.length ? "<div class='di-list'>" + rows.join("") + "</div>" : "<div class='note'>" + (d > today ? "Ничего не запланировано." : "Записей нет.") + "</div>");
+    const box = $("dayInfo");
+    const html = parts.join("");
+    if (box.dataset.v === html) return;
+    box.innerHTML = html; box.dataset.v = html;
+    if (calInfoFor !== null && calInfoFor !== d) anim(box, reduce() ? [{ opacity: 0.4 }, { opacity: 1 }] : [{ opacity: 0, transform: "translateY(4px)" }, { opacity: 1, transform: "none" }], { duration: 200, easing: EASE_OUT });
+    calInfoFor = d;
+  }
+
+  function calRefresh() { if (configured()) renderCalendar(compute()); }
+  function calGo(step) {
+    if (!calYm) return;
+    const btn = step < 0 ? $("calPrev") : $("calNext");
+    if (btn.disabled) return;
+    calYm = addMonths(calYm, step); calSel = null; calDir = step;
+    calRefresh();
+  }
+  $("calPrev").addEventListener("click", () => calGo(-1));
+  $("calNext").addEventListener("click", () => calGo(1));
+  $("calToday").addEventListener("click", () => {
+    const t = todayISO();
+    calDir = calYm === monthOf(t) ? 0 : (calYm > monthOf(t) ? -1 : 1);
+    calYm = monthOf(t); calSel = t; calRefresh();
+  });
+  (function () {
+    const grid = $("calGrid");
+    let sx = null, sy = 0, swiped = false;
+    grid.addEventListener("pointerdown", (e) => { sx = e.clientX; sy = e.clientY; swiped = false; });
+    grid.addEventListener("pointerup", (e) => {
+      if (sx === null) return;
+      const dx = e.clientX - sx, dy = e.clientY - sy; sx = null;
+      if (Math.abs(dx) > 44 && Math.abs(dx) > Math.abs(dy) * 1.5) { swiped = true; calGo(dx < 0 ? 1 : -1); }
+    });
+    grid.addEventListener("pointercancel", () => { sx = null; });
+    grid.addEventListener("click", (e) => {
+      if (swiped) { swiped = false; return; }
+      const b = e.target.closest(".day[data-d]");
+      if (!b) return;
+      calSel = b.dataset.d;
+      grid.querySelectorAll(".day[aria-pressed='true']").forEach((x) => x.setAttribute("aria-pressed", "false"));
+      b.setAttribute("aria-pressed", "true");
+      calRefresh();
+    });
+  })();
 
   function renderDebt(c) {
     const startTotal = state.buckets.reduce((s, b) => s + b.a, 0);
