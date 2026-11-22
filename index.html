@@ -27,6 +27,16 @@
   --warn: #A86B12; --warn-soft: #F4E6CC;
   --bad: #B0412F; --bad-soft: #F4DCD6;
   --scrim: rgba(31, 30, 27, .38);
+  /* motion */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --t-press: 160ms;
+  --t-ui: 200ms;
+  --t-move: 250ms;
+  --t-fill: 300ms;
+  --t-toast: 400ms;
+  --t-sheet: 500ms;
   --serif: "Source Serif 4", "Iowan Old Style", Georgia, serif;
   --sans: "Inter", -apple-system, "SF Pro Text", system-ui, sans-serif;
   --r: 18px;
@@ -83,10 +93,10 @@ header.top .date { color: var(--muted); font-size: 13px; text-align: right; }
 .hero .sub { color: var(--muted); font-size: 14px; }
 .hero .sub b { color: var(--fg); font-weight: 600; }
 .meter { height: 8px; border-radius: 99px; background: var(--card-2); overflow: hidden; }
-.meter > i { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width .4s ease; }
+.meter > i { display: block; height: 100%; border-radius: inherit; background: var(--accent); clip-path: inset(0 100% 0 0 round 99px); transition: clip-path var(--t-fill) var(--ease-out), background-color var(--t-ui) ease; }
 .meter.over > i { background: var(--bad); }
 .meter.paid > i { background: var(--good); }
-.pill { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 99px; white-space: nowrap; }
+.pill { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 99px; white-space: nowrap; transition: background-color var(--t-ui) ease, color var(--t-ui) ease; }
 .pill.good { background: var(--good-soft); color: var(--good); }
 .pill.warn { background: var(--warn-soft); color: var(--warn); }
 .pill.bad { background: var(--bad-soft); color: var(--bad); }
@@ -102,22 +112,39 @@ header.top .date { color: var(--muted); font-size: 13px; text-align: right; }
   appearance: none; border: 0; font: inherit; font-weight: 600; font-size: 16px;
   border-radius: 14px; padding: 15px 14px; cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  transition: transform .08s ease; color: var(--fg); text-decoration: none;
+  color: var(--fg); text-decoration: none; -webkit-user-select: none; user-select: none;
+  transition: transform var(--t-press) var(--ease-out), background-color var(--t-ui) ease, border-color var(--t-ui) ease, color var(--t-ui) ease;
 }
-.btn:active { transform: scale(.98); }
+.btn:active { transform: scale(0.97); }
 .btn:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .btn.primary { background: var(--accent); color: var(--accent-ink); }
 .btn.ghost { background: var(--card); color: var(--fg); border: 1px solid var(--line); }
 .btn.small { font-size: 14px; padding: 10px 12px; border-radius: 12px; }
 .btn svg { width: 18px; height: 18px; }
 .btn.danger { color: var(--bad); }
+@media (hover: hover) and (pointer: fine) {
+  .btn.primary:hover { background: color-mix(in oklab, var(--accent) 88%, var(--fg)); }
+  .btn.ghost:hover { background: var(--card-2); }
+  .chip:hover { border-color: var(--muted); }
+  .linkbtn:hover, .del:hover { opacity: .75; }
+  .seg button:not([aria-pressed="true"]):hover { color: var(--fg); }
+  details.card > summary:hover::after { color: var(--fg); }
+}
 
-.seg { display: flex; background: var(--card-2); border-radius: 12px; padding: 3px; gap: 3px; }
-.seg button { flex: 1; min-width: 0; appearance: none; border: 0; background: transparent; font: inherit; font-size: 13px; font-weight: 500; color: var(--muted); padding: 8px 6px; border-radius: 9px; cursor: pointer; }
-.seg button[aria-pressed="true"] { background: var(--card); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.seg { position: relative; isolation: isolate; display: flex; background: var(--card-2); border-radius: 12px; padding: 3px; gap: 3px; }
+.seg::before {
+  content: ""; position: absolute; z-index: -1; top: 3px; bottom: 3px; left: 3px; width: calc((100% - 9px) / 2);
+  border-radius: 9px; background: var(--card); box-shadow: 0 1px 2px rgba(0,0,0,.08);
+  transition: transform var(--t-move) var(--ease-in-out);
+}
+.seg[data-on="1"]::before { transform: translateX(calc(100% + 3px)); }
+.seg button { flex: 1; min-width: 0; appearance: none; border: 0; background: transparent; font: inherit; font-size: 13px; font-weight: 500; color: var(--muted); padding: 8px 6px; border-radius: 9px; cursor: pointer; transition: color var(--t-ui) ease, transform var(--t-press) var(--ease-out); }
+.seg button:active { transform: scale(0.97); }
+.seg button[aria-pressed="true"] { color: var(--fg); }
 
 .debt-sum { font-family: var(--serif); font-size: 30px; font-weight: 500; letter-spacing: -.01em; margin-top: 4px; }
-.linkbtn { appearance: none; border: 0; background: none; font: inherit; font-size: 14px; font-weight: 500; color: var(--accent); cursor: pointer; padding: 4px 0; white-space: nowrap; text-decoration: none; }
+.linkbtn { appearance: none; border: 0; background: none; font: inherit; font-size: 14px; font-weight: 500; color: var(--accent); cursor: pointer; padding: 4px 0; white-space: nowrap; text-decoration: none; transition: opacity var(--t-press) var(--ease-out); }
+.linkbtn:active { opacity: .55; }
 .foot { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; margin-top: 8px; gap: 10px; flex-wrap: wrap; }
 
 .dl { display: flex; flex-direction: column; }
@@ -144,15 +171,17 @@ header.top .date { color: var(--muted); font-size: 13px; text-align: right; }
 .hist .what div:last-child { font-size: 12px; color: var(--muted); }
 .hist .amt { font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
 .hist .amt.in { color: var(--good); }
-.del { appearance: none; border: 0; background: none; color: var(--muted); font: inherit; font-size: 13px; cursor: pointer; padding: 6px 4px; border-radius: 8px; }
+.del { appearance: none; border: 0; background: none; color: var(--muted); font: inherit; font-size: 13px; cursor: pointer; padding: 6px 4px; border-radius: 8px; transition: color var(--t-ui) ease, opacity var(--t-press) var(--ease-out); }
+.del:active { opacity: .55; }
 .del.armed { color: var(--bad); font-weight: 600; }
 .empty { color: var(--muted); font-size: 14px; padding: 10px 0 2px; }
 
 details.card { padding: 0; }
 details.card > summary { list-style: none; cursor: pointer; padding: 16px 18px; display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
 details.card > summary::-webkit-details-marker { display: none; }
-details.card > summary::after { content: "›"; font-size: 20px; color: var(--muted); transition: transform .2s; }
-details.card[open] > summary::after { transform: rotate(90deg); }
+details.card > summary { -webkit-user-select: none; user-select: none; }
+details.card > summary::after { content: "›"; font-size: 20px; color: var(--muted); transition: transform var(--t-ui) var(--ease-out), color var(--t-ui) ease; }
+details.card.is-open > summary::after { transform: rotate(90deg); }
 .settings { padding: 0 18px 18px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
 .settings .full { grid-column: 1 / -1; }
 .settings h4 { grid-column: 1 / -1; margin: 10px 0 -4px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
@@ -174,34 +203,51 @@ input[type="date"] { min-height: 46px; }
 
 .howto { font-size: 13px; color: var(--muted); text-align: center; padding: 6px 10px 0; text-wrap: balance; margin: 0; }
 
-.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 40; opacity: 0; transition: opacity .2s; }
+.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 40; opacity: 0; transition: opacity var(--t-sheet) var(--ease-drawer); }
 .scrim.show { opacity: 1; }
 .sheet {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
   background: var(--card); border-radius: 22px 22px 0 0; border-top: 1px solid var(--line);
   padding-top: 10px; padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
   padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px));
-  transform: translateY(105%); transition: transform .25s cubic-bezier(.2,.8,.2,1);
+  transform: translateY(calc(100% + 8px)); transition: transform var(--t-sheet) var(--ease-drawer); will-change: transform;
   max-width: 560px; margin: 0 auto; max-height: 92vh; overflow-y: auto;
   display: flex; flex-direction: column; gap: 12px;
 }
 .sheet.show { transform: none; }
+.sheet:not(.show) { pointer-events: none; }
+.sheet.dragging { transition: none; }
+.grab { position: relative; cursor: grab; }
+.grab::before { content: ""; position: absolute; inset: -14px -60px; }
+.sheet .grab, .sheet h2, .sheet > p { touch-action: none; }
 .grab { width: 40px; height: 5px; border-radius: 99px; background: var(--line); margin: 0 auto 2px; flex: none; }
 .sheet h2 { font-family: var(--serif); font-weight: 500; font-size: 24px; margin: 0; }
 .sheet p { margin: 0; color: var(--muted); font-size: 14px; }
 .amount-in { font-family: var(--serif); font-size: 34px !important; padding: 10px 14px !important; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip { appearance: none; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font: inherit; font-size: 14px; font-weight: 500; border-radius: 99px; padding: 8px 14px; cursor: pointer; font-variant-numeric: tabular-nums; }
-.feeline { font-size: 14px; border-radius: 12px; padding: 10px 12px; background: var(--bad-soft); }
+.chip { appearance: none; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font: inherit; font-size: 14px; font-weight: 500; border-radius: 99px; padding: 8px 14px; cursor: pointer; font-variant-numeric: tabular-nums; transition: transform var(--t-press) var(--ease-out), border-color var(--t-ui) ease; }
+.chip:active { transform: scale(0.97); }
+.feeline { font-size: 14px; border-radius: 12px; padding: 10px 12px; background: var(--bad-soft); transition: opacity var(--t-ui) var(--ease-out), transform var(--t-ui) var(--ease-out); }
+@starting-style { .feeline { opacity: 0; transform: translateY(-4px); } }
 .feeline b { color: var(--bad); }
 
 .toast {
-  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px);
+  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 100%);
   background: var(--fg); color: var(--bg); padding: 12px 16px; border-radius: 14px; font-size: 14px; font-weight: 500;
-  opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 60; width: max-content; max-width: calc(100% - 32px); text-align: center;
+  opacity: 0; pointer-events: none; transition: opacity var(--t-toast) ease, transform var(--t-toast) ease; z-index: 60; width: max-content; max-width: calc(100% - 32px); text-align: center;
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+@media (prefers-reduced-motion: reduce) {
+  /* keep fades that explain state, drop movement */
+  .btn:active, .chip:active, .seg button:active { transform: none; }
+  .seg::before { transition: none; }
+  .sheet { transform: none; opacity: 0; transition: opacity var(--t-ui) ease; }
+  .sheet.show { opacity: 1; }
+  .toast, .toast.show { transform: translate(-50%, 0); }
+  .feeline { transform: none; }
+  @starting-style { .feeline { opacity: 0; transform: none; } }
+  details.card > summary::after { transition: color var(--t-ui) ease; }
+}
 </style>
 </head>
 <body>
@@ -355,6 +401,31 @@ input[type="date"] { min-height: 46px; }
   "use strict";
   const KEY = "kreditka-v1";
   const $ = (id) => document.getElementById(id);
+
+  // ---------- motion ----------
+  // Same curves as the CSS tokens. Every animation here is transform/opacity (or clip-path), interruptible, and has a reduced-motion variant.
+  const EASE_OUT = "cubic-bezier(0.23, 1, 0.32, 1)";
+  const rmq = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+  const reduce = () => !!(rmq && rmq.matches);
+  let settleDelay = 0; // lets number changes play after the sheet has started closing
+  function anim(el, frames, opts) {
+    if (!el || typeof el.animate !== "function" || document.hidden) return null;
+    try { return el.animate(frames, opts); } catch (e) { return null; }
+  }
+  const fillClip = (pct) => "inset(0 " + (100 - Math.max(0, Math.min(100, pct))) + "% 0 0 round 99px)";
+  function fill(i, pct) { if (i) i.style.clipPath = fillClip(pct); }
+  // Swap a value; if it really changed (not first paint, not a timer re-render), nudge it in so the change is noticed.
+  function setValue(el, value, asHTML) {
+    const prev = el.dataset.v;
+    if (prev === value) return;
+    if (asHTML) el.innerHTML = value; else el.textContent = value;
+    el.dataset.v = value;
+    if (prev === undefined) return;
+    anim(el, reduce()
+      ? [{ opacity: 0.4 }, { opacity: 1 }]
+      : [{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }],
+      { duration: 200, easing: EASE_OUT, delay: settleDelay, fill: "backwards" });
+  }
 
   // ---------- dates ----------
   const pad = (n) => String(n).padStart(2, "0");
@@ -566,7 +637,7 @@ input[type="date"] { min-height: 46px; }
   }
 
   // ---------- render ----------
-  let showAll = false, armedId = null, armTimer = null;
+  let showAll = false, armedId = null, armTimer = null, freshId = null, removing = false;
 
   function render() {
     const now = new Date();
@@ -594,8 +665,19 @@ input[type="date"] { min-height: 46px; }
     if (c.now.cash > 0) out.push(["bad", "Долг без льготы: " + rub2(c.now.cash), "Это переводы, наличные и СБП. Проценты на них идут каждый день. Пополнения сначала гасят этот долг."]);
     if (c.nd.overdue) out.push(["bad", "Срок по одному из месяцев прошёл", "Банк уже начисляет проценты. Нажми «Сверить с банком» и перепиши цифры из приложения."]);
     if (!mp && c.now.debt > 0 && Number(c.today.slice(8, 10)) >= 2 && c.today >= addMonths(monthOf(state.startDate), 1) + "-02") out.push(["info", "Впиши обязательный платёж", "Банк считает его после 1-го числа. Сумма и дата есть в СберБанк Онлайн."]);
-    $("alerts").innerHTML = out.map(([k, t, d]) => "<div class='alert " + k + "'><b>" + t + "</b><span>" + d + "</span></div>").join("");
-    $("alerts").hidden = out.length === 0;
+    const box = $("alerts");
+    const html = out.map(([k, t, d]) => "<div class='alert " + k + "'><b>" + t + "</b><span>" + d + "</span></div>").join("");
+    box.hidden = out.length === 0;
+    if (box.dataset.v === html) return;
+    const first = box.dataset.v === undefined;
+    const seen = new Set(Array.from(box.querySelectorAll(".alert b")).map((b) => b.textContent));
+    box.innerHTML = html; box.dataset.v = html;
+    if (first) return;
+    box.querySelectorAll(".alert").forEach((a) => {
+      if (seen.has(a.querySelector("b").textContent)) return;
+      anim(a, reduce() ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: "translateY(-6px) scale(0.98)" }, { opacity: 1, transform: "none" }],
+        { duration: 250, easing: EASE_OUT, delay: settleDelay, fill: "backwards" });
+    });
   }
 
   function renderHero(c) {
@@ -603,9 +685,10 @@ input[type="date"] { min-height: 46px; }
     big.classList.remove("text");
     $("modeNormal").setAttribute("aria-pressed", state.mode !== "careful");
     $("modeCareful").setAttribute("aria-pressed", state.mode === "careful");
+    $("modeNormal").parentElement.dataset.on = state.mode === "careful" ? "1" : "0";
     $("modeNormal").textContent = "Обычно: " + numStr(state.incMin / 1000) + "–" + numStr(state.incMax / 1000) + " тыс.";
     if (c.now.debt <= 0) {
-      big.textContent = "Долг закрыт"; big.classList.add("text");
+      setValue(big, "Долг закрыт"); big.classList.add("text");
       pill.className = "pill good"; pill.textContent = "Свободен";
       meter.hidden = true; $("formula").hidden = true;
       sub.innerHTML = c.now.extra > 0 ? "На карте твои деньги: <b class='num'>" + rub2(c.now.extra) + "</b>." : "Тратить можно всё, что приходит.";
@@ -613,8 +696,8 @@ input[type="date"] { min-height: 46px; }
     }
     meter.hidden = false; $("formula").hidden = false;
     const lim = Math.max(0, Math.floor(c.L));
-    big.innerHTML = fmt0.format(Math.max(0, Math.floor(c.left))) + "<small>₽</small>";
-    meter.firstElementChild.style.width = (lim > 0 ? Math.min(100, c.spent / lim * 100) : (c.spent > 0 ? 100 : 0)) + "%";
+    setValue(big, fmt0.format(Math.max(0, Math.floor(c.left))) + "<small>₽</small>", true);
+    fill(meter.firstElementChild, lim > 0 ? Math.min(100, c.spent / lim * 100) : (c.spent > 0 ? 100 : 0));
     meter.classList.toggle("over", c.left < 0);
     if (c.L <= 0) {
       pill.className = "pill bad"; pill.textContent = "Только гасить";
@@ -663,6 +746,8 @@ input[type="date"] { min-height: 46px; }
 
   function renderMp(c, mp) {
     const body = $("mpBody");
+    const oldFill = body.querySelector(".meter > i");
+    const fromClip = oldFill ? oldFill.style.clipPath : null;
     const nextMonth = addMonths(monthOf(c.today), 1);
     if (!mp) {
       body.innerHTML = "<p class='note' style='margin:8px 0 12px'>Банк считает его после 1-го числа каждого месяца. Если не внести его вовремя, беспроцентный период пропадёт, даже если по плану всё хорошо.</p>" +
@@ -682,18 +767,24 @@ input[type="date"] { min-height: 46px; }
         : "Осталось внести " + rub2(mp.left) + ". Пополнения, записанные после того, как ты вписал платёж, засчитываются сюда.";
       body.innerHTML = "<div class='dl'><div class='dl-item'>" + calHtml(state.mp.d, mp.overdue ? "bad" : "") + "<div class='dl-body'>" +
         "<div class='dl-title'><span class='num'>" + rub2(state.mp.a) + "</span>" + pill + "</div>" +
-        "<div class='meter paid'><i style='width:" + pct + "%'></i></div>" +
+        "<div class='meter paid'><i style='clip-path:" + fillClip(pct) + "'></i></div>" +
         "<div class='note'>" + note + "</div>" +
         "<div class='btns'>" + (mp.done ? "" : "<a class='linkbtn' href='" + icsHref() + "' download='platezh.ics'>Напомнить в Календаре</a>") +
         "<button class='linkbtn' type='button' data-act='mp'>Изменить</button></div></div></div></div>";
     }
+    settleMpFill(fromClip);
+  }
+
+  function settleMpFill(fromClip) {
+    const i = $("mpBody").querySelector(".meter > i");
+    if (i && fromClip && fromClip !== i.style.clipPath) anim(i, [{ clipPath: fromClip }, { clipPath: i.style.clipPath }], { duration: 300, easing: EASE_OUT, delay: settleDelay, fill: "backwards" });
   }
 
   function renderDebt(c) {
     const startTotal = state.buckets.reduce((s, b) => s + b.a, 0);
-    $("debtNow").textContent = rub2(c.now.debt);
+    setValue($("debtNow"), rub2(c.now.debt));
     const pct = startTotal > 0 ? Math.max(0, Math.min(100, (1 - c.now.debt / startTotal) * 100)) : 100;
-    $("debtMeter").firstElementChild.style.width = pct + "%";
+    fill($("debtMeter").firstElementChild, pct);
     $("debtPaid").textContent = c.now.extra > 0 ? "Свои деньги на карте: " + rub2(c.now.extra)
       : c.now.debt < startTotal ? "Закрыто " + Math.round(pct) + "%" : c.now.debt > startTotal ? "Долг вырос на " + rub(c.now.debt - startTotal) : "Начало пути";
     $("debtStart").textContent = "было " + rub2(startTotal) + " на " + human(state.startDate);
@@ -759,12 +850,31 @@ input[type="date"] { min-height: 46px; }
       del.textContent = armedId === e.id ? "Удалить?" : "✕";
       del.setAttribute("aria-label", "Удалить запись");
       del.addEventListener("click", () => {
-        if (armedId === e.id) { state.entries = state.entries.filter((x) => x.id !== e.id); armedId = null; clearTimeout(armTimer); save(); toast("Запись удалена"); }
+        if (armedId === e.id) {
+          if (removing) return;
+          removing = true; armedId = null; clearTimeout(armTimer);
+          const done = () => { removing = false; state.entries = state.entries.filter((x) => x.id !== e.id); save(); toast("Запись удалена"); };
+          const h = li.offsetHeight;
+          const a = anim(li, reduce()
+            ? [{ opacity: 1 }, { opacity: 0 }]
+            : [
+                { opacity: 1, transform: "none", height: h + "px", paddingBlock: "10px", offset: 0 },
+                { opacity: 0, transform: "translateX(16px)", height: h + "px", paddingBlock: "10px", offset: 0.55 },
+                { opacity: 0, transform: "translateX(16px)", height: "0px", paddingBlock: "0px", offset: 1 }
+              ],
+            { duration: reduce() ? 160 : 300, easing: EASE_OUT, fill: "forwards" });
+          if (a) { li.style.overflow = "hidden"; a.onfinish = done; a.oncancel = done; } else done();
+        }
         else { armedId = e.id; clearTimeout(armTimer); armTimer = setTimeout(() => { armedId = null; render(); }, 3000); render(); }
       });
       li.appendChild(del);
       ul.appendChild(li);
+      if (e.id === freshId) {
+        anim(li, reduce() ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: "translateY(-8px)" }, { opacity: 1, transform: "none" }],
+          { duration: 300, easing: EASE_OUT, delay: settleDelay, fill: "backwards" });
+      }
     }
+    freshId = null;
     const ago = state.backupAt ? days(new Date(state.backupAt).toISOString().slice(0, 10), today) : null;
     $("backupNag").textContent = items.length >= 5 && (ago === null || ago >= 7) ? "Давно нет копии" : "";
   }
@@ -792,6 +902,7 @@ input[type="date"] { min-height: 46px; }
     outKind = k;
     $("kindBuy").setAttribute("aria-pressed", k === "buy");
     $("kindCash").setAttribute("aria-pressed", k === "cash");
+    $("kindSeg").dataset.on = k === "cash" ? "1" : "0";
     updateFee();
   }
   function updateFee() {
@@ -810,7 +921,7 @@ input[type="date"] { min-height: 46px; }
     const today = todayISO();
     const cfg = {
       in: { title: "Пополнение", hint: "Сколько положил на кредитку. Всё это идёт в счёт долга.", chips: [state.incMin, Math.round((state.incMin + state.incMax) / 2), state.incMax], ok: "Записать", date: "Дата" },
-      out: { title: "Трата с карты", hint: c && c.now.debt > 0 ? "Сегодня ещё можно " + rub(Math.max(0, c.left)) + "." : "Сколько потратил с кредитки.", chips: [100, 300, 500, 1000], ok: "Записать", date: "Дата" },
+      out: { title: "Трата с карты", hint: c && c.now.debt > 0 ? "Сегодня ещё можно " + rub(Math.max(0, Math.floor(c.left))) + "." : "Сколько потратил с кредитки.", chips: [100, 300, 500, 1000], ok: "Записать", date: "Дата" },
       sync: { title: "Сверка с банком", hint: "Перепиши из СберБанк Онлайн «Вся задолженность на сегодня» и, если есть, «Осталось внести … до …». Расчёт пойдёт от этих цифр.", chips: [], ok: "Сохранить", date: "Дата" },
       mp: { title: "Обязательный платёж", hint: "Впиши, сколько осталось внести и до какого числа, как в приложении банка. Если уже внесён полностью, впиши 0.", chips: [], ok: "Сохранить", date: "Внести до" }
     }[mode];
@@ -835,15 +946,62 @@ input[type="date"] { min-height: 46px; }
       btn.addEventListener("click", () => { $("sheetAmount").value = String(v); updateFee(); $("sheetAmount").focus(); });
       chips.appendChild(btn);
     }
-    $("scrim").hidden = false; $("sheet").hidden = false;
-    requestAnimationFrame(() => { $("scrim").classList.add("show"); $("sheet").classList.add("show"); });
-    setTimeout(() => { try { $("sheetAmount").focus(); } catch (e) {} }, 220);
+    clearTimeout(sheetHideTimer);
+    const sheet = $("sheet"), scrim = $("scrim");
+    sheet.scrollTop = 0;
+    scrim.hidden = false; sheet.hidden = false;
+    void sheet.offsetHeight; // commit the closed position so the open transition always runs
+    scrim.classList.add("show"); sheet.classList.add("show");
+    setTimeout(() => { try { $("sheetAmount").focus({ preventScroll: true }); } catch (e) {} }, 250);
+  }
+  let sheetHideTimer = null;
+  function finishClose() {
+    if ($("sheet").classList.contains("show")) return;
+    clearTimeout(sheetHideTimer);
+    $("scrim").hidden = true; $("sheet").hidden = true; $("sheet").style.bottom = "";
   }
   function closeSheet() {
-    $("scrim").classList.remove("show"); $("sheet").classList.remove("show");
+    const sheet = $("sheet");
+    if (!sheet.classList.contains("show")) return;
+    $("scrim").classList.remove("show"); sheet.classList.remove("show");
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
-    setTimeout(() => { $("scrim").hidden = true; $("sheet").hidden = true; $("sheet").style.bottom = ""; }, 250);
+    clearTimeout(sheetHideTimer);
+    sheetHideTimer = setTimeout(finishClose, reduce() ? 260 : 560); // fallback if transitionend never fires
   }
+  $("sheet").addEventListener("transitionend", (e) => { if (e.target === $("sheet") && (e.propertyName === "transform" || e.propertyName === "opacity")) finishClose(); });
+
+  // Drag the sheet down by its handle or title to dismiss it: distance or a quick flick.
+  (function () {
+    const sheet = $("sheet");
+    let drag = null;
+    sheet.addEventListener("pointerdown", (e) => {
+      if (drag || !sheet.classList.contains("show")) return;              // one finger at a time
+      if (!e.target.closest(".grab, h2, #sheetHint")) return;
+      drag = { id: e.pointerId, y0: e.clientY, t0: performance.now(), dy: 0 };
+      try { sheet.setPointerCapture(e.pointerId); } catch (err) {}
+      sheet.classList.add("dragging");
+    });
+    sheet.addEventListener("pointermove", (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      let dy = e.clientY - drag.y0;
+      if (dy < 0) dy = -Math.pow(-dy, 0.6);                                   // resist dragging up past the edge
+      drag.dy = dy;
+      sheet.style.transform = "translateY(" + dy + "px)";
+      if (!reduce()) $("scrim").style.opacity = String(Math.max(0, 1 - Math.max(0, dy) / (sheet.offsetHeight || 1)));
+    });
+    const end = (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const dt = Math.max(1, performance.now() - drag.t0);
+      const v = drag.dy / dt;
+      const dismiss = drag.dy > sheet.offsetHeight * 0.25 || (drag.dy > 12 && v > 0.11);
+      drag = null;
+      sheet.classList.remove("dragging");
+      sheet.style.transform = ""; $("scrim").style.opacity = "";
+      if (dismiss) closeSheet();
+    };
+    sheet.addEventListener("pointerup", end);
+    sheet.addEventListener("pointercancel", end);
+  })();
   const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
   $("sheet").addEventListener("submit", (ev) => {
@@ -855,7 +1013,7 @@ input[type="date"] { min-height: 46px; }
       if (!isFinite(a) || a < 0) return err("Впиши сумму цифрами, например 680");
       if (!isDate(d)) return err("Выбери дату, до которой нужно внести платёж");
       state.mp = { a: r2(a), d, ts: Date.now() };
-      save(); closeSheet();
+      settleDelay = 120; closeSheet(); save(); settleDelay = 0;
       return toast(a > 0 ? "Платёж " + rub2(a) + " до " + human(d) + " записан" : "Записал: платёж внесён");
     }
     if (!isFinite(a) || a < 0 || (sheetMode !== "sync" && a === 0)) return err("Впиши сумму цифрами, например 4000");
@@ -873,10 +1031,12 @@ input[type="date"] { min-height: 46px; }
     }
     const before = compute();
     state.entries.push(entry);
-    save(); closeSheet();
+    freshId = entry.id;
+    settleDelay = 120;
+    closeSheet(); save(); settleDelay = 0;
     const after = compute();
     if (sheetMode === "in") toast("+" + rub2(a) + " · долг теперь " + rub2(after.now.debt));
-    else if (sheetMode === "out") toast(entry.k === "cash" ? "Записал с комиссией " + rub2(entry.fee) : after.left >= 0 ? "Записал. Сегодня ещё можно " + rub(after.left) : "Записал. Перерасход " + rub(-after.left));
+    else if (sheetMode === "out") toast(entry.k === "cash" ? "Записал с комиссией " + rub2(entry.fee) : after.left >= 0 ? "Записал. Сегодня ещё можно " + rub(Math.floor(after.left)) : "Записал. Перерасход " + rub(-after.left));
     else toast("Сверено: " + rub2(a) + (Math.abs(after.now.debt - before.now.debt) >= 1 ? " (разница " + rub(after.now.debt - before.now.debt) + ")" : ""));
   });
   $("sheetAmount").addEventListener("input", updateFee);
@@ -895,7 +1055,9 @@ input[type="date"] { min-height: 46px; }
   // ---------- toast ----------
   let toastTimer = null;
   function toast(msg) {
-    const t = $("toast"); t.textContent = msg; t.classList.add("show");
+    const t = $("toast");
+    if (t.classList.contains("show") && t.textContent !== msg) anim(t, [{ opacity: 0.4 }, { opacity: 1 }], { duration: 200, easing: EASE_OUT });
+    t.textContent = msg; t.classList.add("show");
     clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 3000);
   }
 
@@ -976,8 +1138,41 @@ input[type="date"] { min-height: 46px; }
     state = s;
     save();
     window.scrollTo(0, 0);
+    ["alerts", "heroCard", "mainActions", "mpCard", "debtCard", "dlCard"].map($).filter((el) => !el.hidden).forEach((el, i) => {
+      anim(el, reduce() ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }],
+        { duration: 300, easing: EASE_OUT, delay: reduce() ? 0 : [0, 50, 90, 120, 145, 165][i], fill: "backwards" });
+    });
     toast("Готово. Вот твой лимит на сегодня");
   });
+
+  // ---------- settings accordion ----------
+  // Height + opacity on the panel (no transform equivalent for an accordion); short, interruptible, reversible mid-way.
+  (function () {
+    const box = $("settingsBox"), panel = box.querySelector(".settings"), summary = box.querySelector("summary");
+    let a = null;
+    box.addEventListener("toggle", () => { if (!a) box.classList.toggle("is-open", box.open); });
+    summary.addEventListener("click", (e) => {
+      e.preventDefault();
+      const opening = !box.classList.contains("is-open");
+      box.classList.toggle("is-open", opening);
+      const fromH = box.open ? panel.getBoundingClientRect().height : 0;
+      const fromO = a ? parseFloat(getComputedStyle(panel).opacity) : (opening ? 0 : 1);
+      if (a) { a.onfinish = null; a.cancel(); a = null; }
+      box.open = true;
+      const toH = opening ? panel.scrollHeight : 0;
+      panel.style.overflow = "hidden";
+      const frames = reduce()
+        ? [{ opacity: fromO }, { opacity: opening ? 1 : 0 }]
+        : [{ height: fromH + "px", opacity: fromO }, { height: toH + "px", opacity: opening ? 1 : 0 }];
+      a = anim(panel, frames, { duration: 200, easing: EASE_OUT });
+      const done = () => {
+        a = null; panel.style.overflow = "";
+        if (!opening) box.open = false;
+        else summary.scrollIntoView ? box.scrollIntoView({ block: "nearest", behavior: reduce() ? "auto" : "smooth" }) : 0;
+      };
+      if (a) a.onfinish = done; else done();
+    });
+  })();
 
   // ---------- wiring ----------
   $("btnIn").addEventListener("click", () => openSheet("in"));
