@@ -159,82 +159,83 @@ header.top .date { color: var(--muted); font-size: 13px; text-align: right; }
 .btns { display: flex; gap: 18px; flex-wrap: wrap; }
 .tip { font-size: 13px; color: var(--muted); padding-top: 12px; border-top: 1px dashed var(--line); }
 
-/* calendar */
-.cal-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
-.cal-title { font-family: var(--serif); font-size: 22px; font-weight: 500; letter-spacing: -.01em; margin-top: 2px; }
-.cal-nav { display: flex; gap: 6px; flex: none; }
-.icon-btn {
-  appearance: none; border: 1px solid var(--line); background: var(--card); color: var(--fg); font: inherit; font-size: 13px; font-weight: 500;
-  min-width: 36px; height: 36px; padding: 0 10px; border-radius: 10px; display: grid; place-items: center; cursor: pointer;
-  transition: transform var(--t-press) var(--ease-out), background-color var(--t-ui) ease, opacity var(--t-ui) ease;
-}
-.icon-btn svg { width: 18px; height: 18px; }
-.icon-btn#calPrev, .icon-btn#calNext { padding: 0; }
-.icon-btn:active:not(:disabled) { transform: scale(0.97); }
-.icon-btn:disabled { opacity: .35; cursor: default; }
-.wk, .cgrid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
-.wk { font-size: 11px; color: var(--muted); text-align: center; letter-spacing: .05em; text-transform: uppercase; margin-bottom: 4px; }
-.cgrid { touch-action: pan-y; }
+/* calendar — iOS Calendar / Activity look */
+.ical { font-family: -apple-system, "SF Pro Text", "SF Pro Display", var(--sans); padding-top: 14px; }
+.ical-top { display: flex; justify-content: space-between; align-items: center; min-height: 32px; }
+.ical-link { appearance: none; border: 0; background: none; font: inherit; font-size: 16px; color: var(--accent); cursor: pointer; padding: 4px 0; transition: opacity var(--t-press) var(--ease-out); }
+.ical-link:active { opacity: .45; }
+.ical-link[hidden] { display: block !important; visibility: hidden; }
+.ical-nav { display: flex; gap: 2px; }
+.ical-chev { appearance: none; border: 0; background: none; color: var(--accent); width: 36px; height: 32px; display: grid; place-items: center; cursor: pointer; border-radius: 8px; transition: opacity var(--t-press) var(--ease-out); }
+.ical-chev svg { width: 22px; height: 22px; }
+.ical-chev:active:not(:disabled) { opacity: .45; }
+.ical-chev:disabled { color: var(--muted); opacity: .35; cursor: default; }
+.ical-title { margin: 2px 0 12px; font-size: 30px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; color: var(--fg); }
+.ical-title span { color: var(--accent); }
+.ical-wk, .ical-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.ical-wk { font-size: 11px; font-weight: 600; color: var(--muted); text-align: center; text-transform: uppercase; letter-spacing: .02em; padding-bottom: 6px; }
+.ical-wk .we { opacity: .6; }
+.ical-grid { touch-action: pan-y; }
+.blank { border-top: .5px solid var(--line); min-height: 64px; }
 .day {
-  appearance: none; border: 1.5px solid transparent; background: transparent; font: inherit; color: var(--fg);
-  border-radius: 12px; min-height: 54px; padding: 5px 1px 5px; min-width: 0; overflow: hidden;
+  appearance: none; background: none; border: 0; border-top: .5px solid var(--line); border-radius: 0;
+  font: inherit; color: var(--fg); min-width: 0; min-height: 64px; padding: 5px 0 6px; cursor: pointer;
   display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px;
-  cursor: pointer; font-variant-numeric: tabular-nums;
-  transition: transform var(--t-press) var(--ease-out), background-color var(--t-ui) ease, border-color var(--t-ui) ease, color var(--t-ui) ease;
+  font-variant-numeric: tabular-nums; -webkit-tap-highlight-color: transparent;
 }
-.day:active { transform: scale(0.97); }
-.day .n { font-size: 12px; font-weight: 500; min-width: 22px; height: 18px; padding: 0 4px; border-radius: 99px; display: grid; place-items: center; line-height: 1; color: var(--muted); }
-.day .v { font-size: 10px; line-height: 1.15; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: clip; }
-.v.sp { color: var(--fg); } .v.in { color: var(--good); } .v.over { color: var(--bad); }
-.v.mp { color: var(--warn); } .v.dl { color: var(--bad); } .v.goal { color: var(--fg); } .v.exp { color: var(--good); font-weight: 500; opacity: .8; }
-.day.pre { opacity: .45; }
-.day.ok { background: var(--good-soft); }
-.day.over { background: var(--bad-soft); }
-.day.ok .n, .day.over .n { color: var(--fg); }
-.day.today .n { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
-.day[aria-pressed="true"] { border-color: var(--fg); }
-.blank { min-height: 54px; }
-.m { display: inline-block; width: 6px; height: 6px; border-radius: 50%; flex: none; }
-.m.in { background: var(--good); }
-.m.buy { background: var(--accent); }
-.m.cash { background: var(--bad); border-radius: 1px; width: 5px; height: 5px; transform: rotate(45deg); }
-.m.exp { box-shadow: inset 0 0 0 1.5px var(--good); }
-.m.mp { background: var(--warn); border-radius: 2px; }
-.m.dl { box-shadow: inset 0 0 0 1.5px var(--bad); border-radius: 2px; }
-.m.goal { background: var(--fg); border-radius: 2px; }
-.sw { display: inline-block; width: 12px; height: 12px; border-radius: 4px; }
-.sw.ok { background: var(--good-soft); box-shadow: inset 0 0 0 1px var(--good); }
-.sw.over { background: var(--bad-soft); box-shadow: inset 0 0 0 1px var(--bad); }
-.cal-sum { font-size: 13px; color: var(--muted); margin-top: 10px; }
-.cal-sum b { color: var(--fg); font-weight: 600; }
-.day-info { margin-top: 12px; padding: 14px; border-radius: 14px; background: var(--card-2); display: flex; flex-direction: column; gap: 8px; }
-.day-info h3 { margin: 0; font-size: 15px; font-weight: 600; }
-.di-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 14px; flex-wrap: wrap; }
-.di-list { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
-.di-list div { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.di-list .amt { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.di-list .amt.in { color: var(--good); }
-.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); margin-top: 10px; }
-.kv { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 14px; }
-.kv span { color: var(--muted); }
-.kv b { font-weight: 600; font-variant-numeric: tabular-nums; }
-.kv b.good { color: var(--good); } .kv b.bad { color: var(--bad); }
-.di-sep { border-top: 1px solid var(--line); margin: 2px 0; }
-.ahead { margin-top: 14px; display: flex; flex-direction: column; }
-.ahead .label { margin-bottom: 4px; }
-.ahead button {
-  appearance: none; border: 0; border-top: 1px solid var(--line); background: none; font: inherit; color: var(--fg); text-align: left; cursor: pointer;
-  display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 10px; align-items: baseline; padding: 9px 0; font-size: 14px;
-  transition: opacity var(--t-press) var(--ease-out);
-}
-.ahead button:first-of-type { border-top: 0; }
-.ahead button:active { opacity: .55; }
-.ahead .when { font-size: 12px; color: var(--muted); font-weight: 500; }
-.ahead .what i { margin-right: 6px; vertical-align: 1px; }
-.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.day .dn { position: relative; width: 36px; height: 36px; display: grid; place-items: center; flex: none; transition: transform var(--t-press) var(--ease-out); }
+.day:active .dn { transform: scale(0.97); }
+.day .dn::before { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: transparent; transition: background-color var(--t-ui) ease; }
+.day .n { position: relative; font-size: 16px; font-weight: 400; line-height: 1; }
+.day.we .n { color: var(--muted); }
+.day.pre { opacity: .4; }
+.day.today .n { color: var(--accent); font-weight: 600; }
+.day[aria-pressed="true"] .dn::before { background: var(--fg); }
+.day[aria-pressed="true"] .n { color: var(--bg); font-weight: 600; }
+.day.today[aria-pressed="true"] .dn::before { background: var(--accent); }
+.day.today[aria-pressed="true"] .n { color: var(--accent-ink); }
+.ring { position: absolute; inset: 0; width: 36px; height: 36px; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 2.6; }
+.ring .tr { stroke: var(--line); }
+.ring .pg { stroke: var(--good); stroke-linecap: round; }
+.ring .pg.over { stroke: var(--bad); }
+.day .v { font-size: 10px; line-height: 1.2; font-weight: 500; color: var(--muted); white-space: nowrap; max-width: 100%; overflow: hidden; letter-spacing: -.01em; }
+.v.in { color: var(--good); } .v.over { color: var(--bad); font-weight: 600; }
+.v.mp { color: var(--warn); font-weight: 600; } .v.dl { color: var(--bad); font-weight: 600; } .v.goal { color: var(--fg); font-weight: 600; } .v.exp { color: var(--good); }
+.ical-cap { margin: 8px 0 0; padding-top: 8px; border-top: .5px solid var(--line); font-size: 12px; color: var(--muted); }
+
+/* stats like Activity */
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+.stat { background: var(--card-2); border-radius: 12px; padding: 10px 10px; min-width: 0; }
+.stat .k { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .02em; }
+.stat b { display: block; margin-top: 2px; font-size: 16px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.stat b small { font-size: 13px; color: var(--muted); font-weight: 600; }
+.stat b.g { color: var(--good); }
+.ical-note { margin: 14px 0 0; font-size: 13px; color: var(--muted); }
+
+/* grouped lists like iOS Settings */
+.ios-h { margin: 18px 4px 6px; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .02em; }
+.ios-g { background: var(--card-2); border-radius: 12px; overflow: hidden; }
+.ios-r { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 14px; font-size: 15px; position: relative; }
+.ios-r + .ios-r::before { content: ""; position: absolute; top: 0; right: 0; left: 14px; border-top: .5px solid var(--line); }
+.ios-r.ic-row + .ios-r::before, .ios-r.ic-row::before { left: 52px; }
+.ios-r .l { flex: 1; min-width: 0; }
+.ios-r .l small { display: block; font-size: 12px; color: var(--muted); margin-top: 1px; }
+.ios-r .r { font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+.ios-r .r.strong { color: var(--fg); font-weight: 600; }
+.ios-r .r.good { color: var(--good); font-weight: 600; } .ios-r .r.bad { color: var(--bad); font-weight: 600; }
+.ic { width: 28px; height: 28px; border-radius: 7px; display: grid; place-items: center; font-size: 15px; font-weight: 700; color: #fff; flex: none; }
+.ic.in, .ic.exp { background: var(--good); } .ic.buy { background: var(--accent); } .ic.cash, .ic.dl { background: var(--bad); }
+.ic.mp { background: var(--warn); } .ic.goal { background: var(--fg); color: var(--bg); } .ic.sync { background: var(--muted); }
+button.ios-r { appearance: none; border: 0; background: none; width: 100%; font: inherit; color: var(--fg); text-align: left; cursor: pointer; transition: background-color var(--t-ui) ease; }
+button.ios-r:active { background: var(--line); }
+.chev { color: var(--muted); opacity: .6; font-size: 18px; line-height: 1; }
 @media (hover: hover) and (pointer: fine) {
-  .day:not(.ok):not(.over):hover { background: var(--card-2); }
-  .icon-btn:hover:not(:disabled) { background: var(--card-2); }
+  .day:hover .dn::before { background: var(--card-2); }
+  .day[aria-pressed="true"]:hover .dn::before { background: var(--fg); }
+  .day.today[aria-pressed="true"]:hover .dn::before { background: var(--accent); }
+  button.ios-r:hover { background: color-mix(in oklab, var(--card-2) 80%, var(--line)); }
+  .ical-chev:hover:not(:disabled), .ical-link:hover { opacity: .7; }
 }
 
 .hist { list-style: none; margin: 8px 0 0; padding: 0; }
@@ -317,7 +318,7 @@ input[type="date"] { min-height: 46px; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 @media (prefers-reduced-motion: reduce) {
   /* keep fades that explain state, drop movement */
-  .btn:active, .chip:active, .seg button:active, .day:active, .icon-btn:active:not(:disabled) { transform: none; }
+  .btn:active, .chip:active, .seg button:active, .day:active .dn { transform: none; }
   .seg::before { transition: none; }
   .sheet { transform: none; opacity: 0; transition: opacity var(--t-ui) ease; }
   .sheet.show { opacity: 1; }
@@ -394,28 +395,21 @@ input[type="date"] { min-height: 46px; }
     <div id="mpBody"></div>
   </section>
 
-  <section class="card" id="calCard" aria-labelledby="calTitle">
-    <div class="cal-head">
-      <div>
-        <div class="label">Календарь</div>
-        <div class="cal-title" id="calTitle" aria-live="polite">—</div>
-      </div>
-      <div class="cal-nav">
-        <button class="icon-btn" type="button" id="calPrev" aria-label="Предыдущий месяц"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
-        <button class="icon-btn" type="button" id="calToday" aria-label="К сегодняшнему дню">Сегодня</button>
-        <button class="icon-btn" type="button" id="calNext" aria-label="Следующий месяц"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+  <section class="card ical" id="calCard" aria-labelledby="calTitle">
+    <div class="ical-top">
+      <button class="ical-link" type="button" id="calToday">Сегодня</button>
+      <div class="ical-nav">
+        <button class="ical-chev" type="button" id="calPrev" aria-label="Предыдущий месяц"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <button class="ical-chev" type="button" id="calNext" aria-label="Следующий месяц"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
       </div>
     </div>
-    <div class="wk" aria-hidden="true"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>
-    <div class="cgrid" id="calGrid"></div>
-    <div class="cal-sum" id="calSum"></div>
-    <div class="day-info" id="dayInfo"></div>
-    <div class="legend">
-      <span><i class="sw ok"></i>уложился в лимит</span>
-      <span><i class="sw over"></i>перерасход</span>
-      <span>Нажми на день, чтобы увидеть подробности</span>
-    </div>
-    <div class="ahead" id="calAhead"></div>
+    <h2 class="ical-title" id="calTitle" aria-live="polite">—</h2>
+    <div class="ical-wk" aria-hidden="true"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span class="we">Сб</span><span class="we">Вс</span></div>
+    <div class="ical-grid" id="calGrid"></div>
+    <p class="ical-cap">Кольцо вокруг дня — сколько потрачено от лимита. Красное — перерасход.</p>
+    <div id="calSum"></div>
+    <div id="dayInfo"></div>
+    <div id="calAhead"></div>
   </section>
 
   <section class="card" id="debtCard" aria-labelledby="debtLabel">
@@ -905,10 +899,10 @@ input[type="date"] { min-height: 46px; }
     const add = (d, k, t) => { (ev[d] = ev[d] || []).push({ k, t }); };
     if (state.mp) {
       const mp = mpStatus(c.today);
-      add(state.mp.d, "mp", "Обязательный платёж " + rub2(state.mp.a) + (mp.done ? ": внесён" : ": осталось " + rub2(mp.left)));
+      add(state.mp.d, "mp", mp.done ? "Обязательный платёж внесён" : "Обязательный платёж " + rub(mp.left));
     }
-    for (const m of Object.keys(c.now.b)) add(deadlineOf(m), "dl", "Срок банка: покупки за " + nomOf(m) + ", " + rub2(c.now.b[m]));
-    if (c.now.cash > 0) add(c.today, "dl", "Переводы и наличные: " + rub2(c.now.cash) + ", проценты уже идут");
+    for (const m of Object.keys(c.now.b)) add(deadlineOf(m), "dl", "Вернуть " + rub(c.now.b[m]) + " за " + nomOf(m));
+    if (c.now.cash > 0) add(c.today, "dl", "Переводы " + rub(c.now.cash) + ": идут проценты");
     if (state.goalDate && c.now.debt > 0) add(state.goalDate, "goal", "Твоя цель: закрыть весь долг");
     const ins = sorted().filter((e) => e.t === "in");
     if (ins.length && c.now.debt > 0) {
@@ -917,7 +911,7 @@ input[type="date"] { min-height: 46px; }
         const d = addDays(last, Math.round(k * avgInt()));
         if (d <= c.today) continue;
         if (days(c.today, d) > 120) break;
-        add(d, "exp", "Ожидается пополнение ~" + rub((state.incMin + state.incMax) / 2));
+        add(d, "exp", "Придут деньги ~" + rub((state.incMin + state.incMax) / 2));
       }
     }
     return ev;
@@ -925,6 +919,12 @@ input[type="date"] { min-height: 46px; }
 
   const compact = (n) => { n = Math.round(n); if (n < 1000) return String(n); const k = Math.round(n / 100) / 10; return numStr(k) + "к"; };
   const relDay = (today, d) => { const n = days(today, d); return n === 0 ? "сегодня" : n === 1 ? "завтра" : n === 2 ? "послезавтра" : "через " + dayWord(n); };
+
+  const ringSvg = (pct, over) => {
+    const p = Math.max(0, Math.min(100, pct));
+    return "<svg class='ring' viewBox='0 0 36 36' aria-hidden='true'><circle class='tr' cx='18' cy='18' r='16.5'/>" +
+      (p > 0 ? "<circle class='pg" + (over ? " over" : "") + "' cx='18' cy='18' r='16.5' pathLength='100' stroke-dasharray='" + p.toFixed(1) + " 100'/>" : "") + "</svg>";
+  };
 
   function renderCalendar(c) {
     const today = c.today;
@@ -939,7 +939,8 @@ input[type="date"] { min-height: 46px; }
     if (calYm > maxYm) calYm = maxYm;
     if (!calSel || monthOf(calSel) !== calYm) calSel = calYm === monthOf(today) ? today : calYm + "-01";
 
-    $("calTitle").textContent = cap(NOM[Number(calYm.slice(5, 7)) - 1]) + (calYm.slice(0, 4) !== today.slice(0, 4) ? " " + calYm.slice(0, 4) : "");
+    const yr = calYm.slice(0, 4);
+    $("calTitle").innerHTML = cap(NOM[Number(calYm.slice(5, 7)) - 1]) + (yr !== today.slice(0, 4) ? " <span>" + yr + "</span>" : "");
     $("calPrev").disabled = calYm <= minYm;
     $("calNext").disabled = calYm >= maxYm;
     $("calToday").hidden = calYm === monthOf(today) && calSel === today;
@@ -956,6 +957,7 @@ input[type="date"] { min-height: 46px; }
       const d = calYm + "-" + pad(i);
       const cls = ["day"];
       const h = H[d];
+      if (weekdayMon(d) >= 5) cls.push("we");
       if (d === today) cls.push("today");
       if (d < state.startDate) cls.push("pre");
       const list = byDay[d] || [];
@@ -963,21 +965,22 @@ input[type="date"] { min-height: 46px; }
       const spent = list.filter((e) => e.t === "out").reduce((t, e) => t + e.a + (e.k === "cash" ? (e.fee || 0) : 0), 0);
       inSum += inAmt; spentSum += spent;
       const lines = [], say = [];
-      let isOver = false;
+      let ring = "", isOver = false;
       if (h && d <= today) {
-        isOver = h.spent > Math.max(0, h.L) + 0.5;
-        if (d < today || isOver) cls.push(isOver ? "over" : "ok");
-        if (d < today) { if (isOver) overDays++; else okDays++; }
+        const lim = Math.max(0, h.L);
+        isOver = h.spent > lim + 0.5;
+        ring = ringSvg(isOver ? 100 : (lim > 0 ? h.spent / lim * 100 : 0), isOver);
+        if (d < today) { if (isOver) overDays++; else okDays++; say.push(isOver ? "перерасход" : "в лимите"); }
       }
-      if (inAmt) { lines.push(["in", "+" + compact(inAmt)]); say.push("внесено " + rub(inAmt)); }
       if (spent) { lines.push([isOver ? "over" : "sp", "−" + compact(spent)]); say.push("потрачено " + rub(spent)); }
+      if (inAmt) { lines.push(["in", "+" + compact(inAmt)]); say.push("внесено " + rub(inAmt)); }
       if (d >= today) {
         for (const k of ["mp", "dl", "goal"]) if ((ev[d] || []).some((x) => x.k === k) && !(k === "dl" && d === today)) { lines.push([k, EV_WORD[k]]); say.push(EV_WORD[k]); }
         if (d > today && !inAmt && (ev[d] || []).some((x) => x.k === "exp")) { lines.push(["exp", "+~" + compact((state.incMin + state.incMax) / 2)]); say.push("ожидается доход"); }
       }
-      if (cls.includes("ok")) say.push("в лимите"); else if (cls.includes("over")) say.push("перерасход");
       const label = human(d) + (d === today ? ", сегодня" : "") + (say.length ? ": " + say.join(", ") : "");
-      cells.push("<button type='button' class='" + cls.join(" ") + "' data-d='" + d + "' aria-pressed='" + (d === calSel) + "' aria-label='" + label + "'><span class='n'>" + i + "</span>" +
+      cells.push("<button type='button' class='" + cls.join(" ") + "' data-d='" + d + "' aria-pressed='" + (d === calSel) + "' aria-label='" + label + "'>" +
+        "<span class='dn'>" + ring + "<span class='n'>" + i + "</span></span>" +
         lines.slice(0, 2).map(([k, t]) => "<span class='v " + k + "'>" + t + "</span>").join("") + "</button>");
     }
     const grid = $("calGrid");
@@ -985,77 +988,76 @@ input[type="date"] { min-height: 46px; }
     if (grid.dataset.v !== html) { grid.innerHTML = html; grid.dataset.v = html; }
     if (calDir) {
       anim(grid, reduce() ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: "translateX(" + (calDir * 16) + "px)" }, { opacity: 1, transform: "none" }], { duration: 220, easing: EASE_OUT });
-      anim($("calTitle"), [{ opacity: 0 }, { opacity: 1 }], { duration: 220, easing: EASE_OUT });
+      anim($("calTitle"), reduce() ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: "translateX(" + (calDir * 8) + "px)" }, { opacity: 1, transform: "none" }], { duration: 220, easing: EASE_OUT });
       calDir = 0;
     }
 
     let sum;
     if (calYm > monthOf(today)) {
-      const evs = Object.keys(ev).filter((d) => monthOf(d) === calYm).sort();
-      const names = [];
-      for (const d of evs) for (const x of ev[d]) if (x.k === "dl") names.push("срок банка " + human(d)); else if (x.k === "mp") names.push("обязательный платёж " + human(d)); else if (x.k === "goal") names.push("твоя цель " + human(d));
-      sum = names.length ? "В этом месяце: " + names.join(", ") + "." : "В этом месяце сроков нет. Внизу у дней — когда примерно придут деньги.";
-    } else if (okDays + overDays === 0) {
-      sum = "Учёт идёт с " + human(state.startDate) + ". Каждый прожитый день станет зелёным, если уложишься в лимит, или красным, если нет.";
+      sum = "";
+    } else if (okDays + overDays === 0 && !spentSum && !inSum) {
+      sum = "<p class='ical-note'>Учёт идёт с " + human(state.startDate) + ". Каждый прожитый день получит кольцо: зелёное — уложился, красное — перерасход.</p>";
     } else {
-      sum = "В этом месяце уложился в лимит <b>" + okDays + " из " + (okDays + overDays) + "</b> " + plural(okDays + overDays, "дня", "дней", "дней") +
-        ". Потрачено <b>" + rub(spentSum) + "</b>, внесено <b>" + rub(inSum) + "</b>.";
+      sum = "<div class='stats'>" +
+        "<div class='stat'><span class='k'>В лимите</span><b>" + okDays + "<small>/" + (okDays + overDays) + " дн.</small></b></div>" +
+        "<div class='stat'><span class='k'>Потрачено</span><b>" + rub(spentSum) + "</b></div>" +
+        "<div class='stat'><span class='k'>Внесено</span><b class='g'>" + rub(inSum) + "</b></div></div>";
     }
-    $("calSum").innerHTML = sum;
+    const sb = $("calSum");
+    if (sb.dataset.v !== sum) { sb.innerHTML = sum; sb.dataset.v = sum; }
 
     renderDayInfo(c, H, ev, byDay);
     renderAhead(c, ev);
   }
+
+  const IC = { in: "+", buy: "−", cash: "↔", exp: "+", mp: "₽", dl: "!", goal: "★", sync: "=" };
 
   function renderAhead(c, ev) {
     const items = [];
     for (const d of Object.keys(ev).sort()) {
       if (d < c.today) continue;
       for (const x of ev[d]) {
-        if (x.k === "dl" && d === c.today && /Переводы/.test(x.t)) continue;
-        if (x.k === "exp" && items.some((it) => it.x.k === "exp")) continue; // only the next expected deposit
+        if (x.k === "dl" && d === c.today && /^Переводы/.test(x.t)) continue;
+        if (x.k === "exp" && items.some((it) => it.x.k === "exp")) continue;
         items.push({ d, x });
       }
     }
     const top = items.slice(0, 4);
+    const html = top.length ? "<div class='ios-h'>Впереди</div><div class='ios-g'>" + top.map(({ d, x }) =>
+      "<button type='button' class='ios-r ic-row' data-d='" + d + "'><span class='ic " + x.k + "'>" + IC[x.k] + "</span>" +
+      "<span class='l'>" + x.t + "<small>" + cap(relDay(c.today, d)) + " · " + human(d) + "</small></span><span class='chev'>›</span></button>").join("") + "</div>" : "";
     const box = $("calAhead");
-    const html = top.length ? "<div class='label'>Впереди</div>" + top.map(({ d, x }) =>
-      "<button type='button' data-d='" + d + "'><span class='when'>" + relDay(c.today, d) + "</span><span class='what'><i class='m " + x.k + "'></i>" + x.t + " · " + human(d) + "</span></button>").join("") : "";
     if (box.dataset.v !== html) { box.innerHTML = html; box.dataset.v = html; }
   }
 
   function renderDayInfo(c, H, ev, byDay) {
     const d = calSel, today = c.today;
-    const parts = [];
     const wdName = WEEK[new Date(toUTC(d)).getUTCDay()];
-    parts.push("<h3>" + cap(wdName) + ", " + human(d) + (d === today ? " · сегодня" : "") + "</h3>");
+    const rows = [];
     const h = H[d];
-    if (d < state.startDate) parts.push("<div class='note'>Это было до начала учёта.</div>");
+    if (d < state.startDate) rows.push("<div class='ios-r'><span class='l'>Это было до начала учёта</span></div>");
     else if (h && d <= today) {
       const lim = Math.max(0, Math.floor(h.L));
       const over = h.spent - lim;
-      parts.push("<div class='kv'><span>Лимит на день</span><b>" + rub(lim) + "</b></div>");
-      parts.push("<div class='kv'><span>Потрачено</span><b>" + rub(h.spent) + "</b></div>");
-      if (over > 0.5) parts.push("<div class='kv'><span>Перерасход</span><b class='bad'>" + rub(over) + "</b></div>");
-      else parts.push("<div class='kv'><span>" + (d === today ? "Ещё можно" : "Сэкономил") + "</span><b class='good'>" + rub(lim - h.spent) + "</b></div>");
+      rows.push("<div class='ios-r'><span class='l'>Лимит на день</span><span class='r strong'>" + rub(lim) + "</span></div>");
+      rows.push("<div class='ios-r'><span class='l'>Потрачено</span><span class='r strong'>" + rub(h.spent) + "</span></div>");
+      if (over > 0.5) rows.push("<div class='ios-r'><span class='l'>Перерасход</span><span class='r bad'>" + rub(over) + "</span></div>");
+      else rows.push("<div class='ios-r'><span class='l'>" + (d === today ? "Ещё можно" : "Сэкономил") + "</span><span class='r good'>" + rub(lim - h.spent) + "</span></div>");
     } else if (d > today && c.now.debt > 0) {
-      parts.push("<div class='kv'><span>Можно будет тратить</span><b>~" + rub(Math.max(0, c.base)) + "</b></div>");
-      parts.push("<div class='note'>Прогноз, если деньги будут приходить как обычно.</div>");
+      rows.push("<div class='ios-r'><span class='l'>Можно будет тратить<small>Прогноз, если деньги придут как обычно</small></span><span class='r strong'>~" + rub(Math.max(0, c.base)) + "</span></div>");
     }
     const list = (byDay[d] || []).slice().sort((a, b) => (a.ts || 0) - (b.ts || 0));
-    const rows = [];
     for (const e of list) {
-      if (e.t === "in") rows.push("<div><i class='m in'></i>Пополнение<span class='amt in'>+" + rub2(e.a) + "</span></div>");
-      else if (e.t === "out" && e.k === "cash") rows.push("<div><i class='m cash'></i>Перевод / наличные<span class='amt'>−" + rub2(e.a + (e.fee || 0)) + "</span></div>");
-      else if (e.t === "out") rows.push("<div><i class='m buy'></i>Покупка<span class='amt'>−" + rub2(e.a) + "</span></div>");
-      else rows.push("<div><i class='m goal'></i>Сверка с банком<span class='amt'>" + rub2(e.a) + "</span></div>");
+      if (e.t === "in") rows.push("<div class='ios-r ic-row'><span class='ic in'>" + IC.in + "</span><span class='l'>Пополнение</span><span class='r good'>+" + rub2(e.a) + "</span></div>");
+      else if (e.t === "out" && e.k === "cash") rows.push("<div class='ios-r ic-row'><span class='ic cash'>" + IC.cash + "</span><span class='l'>Перевод / наличные<small>с комиссией</small></span><span class='r strong'>−" + rub2(e.a + (e.fee || 0)) + "</span></div>");
+      else if (e.t === "out") rows.push("<div class='ios-r ic-row'><span class='ic buy'>" + IC.buy + "</span><span class='l'>Покупка</span><span class='r strong'>−" + rub2(e.a) + "</span></div>");
+      else rows.push("<div class='ios-r ic-row'><span class='ic sync'>" + IC.sync + "</span><span class='l'>Сверка с банком</span><span class='r'>" + rub2(e.a) + "</span></div>");
     }
-    for (const x of (ev[d] || [])) rows.push("<div><i class='m " + x.k + "'></i><span>" + x.t + "</span></div>");
-    if (d > today && Number(d.slice(8, 10)) === 1) rows.push("<div><i class='m buy'></i><span>С этого дня покупки беспроцентные до " + human(deadlineOf(monthOf(d))) + "</span></div>");
-    if (rows.length) parts.push("<div class='di-sep'></div><div class='di-list'>" + rows.join("") + "</div>");
-    else if (!(h && d <= today) && !(d > today && c.now.debt > 0)) parts.push("<div class='note'>Записей нет.</div>");
+    for (const x of (ev[d] || [])) rows.push("<div class='ios-r ic-row'><span class='ic " + x.k + "'>" + IC[x.k] + "</span><span class='l'>" + x.t + "</span></div>");
+    if (d > today && Number(d.slice(8, 10)) === 1) rows.push("<div class='ios-r ic-row'><span class='ic buy'>" + IC.buy + "</span><span class='l'>С этого дня покупки беспроцентные до " + human(deadlineOf(monthOf(d))) + "</span></div>");
+    if (!rows.length) rows.push("<div class='ios-r'><span class='l' style='color:var(--muted)'>Записей нет</span></div>");
+    const html = "<div class='ios-h'>" + cap(wdName) + ", " + human(d) + (d === today ? " · сегодня" : "") + "</div><div class='ios-g'>" + rows.join("") + "</div>";
     const box = $("dayInfo");
-    const html = parts.join("");
     if (box.dataset.v === html) return;
     box.innerHTML = html; box.dataset.v = html;
     if (calInfoFor !== null && calInfoFor !== d) anim(box, reduce() ? [{ opacity: 0.4 }, { opacity: 1 }] : [{ opacity: 0, transform: "translateY(4px)" }, { opacity: 1, transform: "none" }], { duration: 200, easing: EASE_OUT });
