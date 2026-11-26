@@ -332,6 +332,9 @@ input[type="date"] { min-height: 46px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { appearance: none; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font: inherit; font-size: 14px; font-weight: 500; border-radius: 99px; padding: 8px 14px; cursor: pointer; font-variant-numeric: tabular-nums; transition: transform var(--t-press) var(--ease-out), border-color var(--t-ui) ease; }
 .chip:active { transform: scale(0.97); }
+.chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.daypick { display: flex; flex-direction: column; gap: 8px; }
+.di-add { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; margin-top: 10px; }
 .feeline { font-size: 14px; border-radius: 12px; padding: 10px 12px; background: var(--bad-soft); transition: opacity var(--t-ui) var(--ease-out), transform var(--t-ui) var(--ease-out); }
 @starting-style { .feeline { opacity: 0; transform: translateY(-4px); } }
 .feeline b { color: var(--bad); }
@@ -511,10 +514,21 @@ input[type="date"] { min-height: 46px; }
 <input type="file" id="importFile" accept=".json,application/json,text/plain" hidden>
 
 <div class="scrim" id="scrim" hidden></div>
-<form class="sheet" id="sheet" hidden autocomplete="off">
+<form class="sheet" id="sheet" hidden autocomplete="off" novalidate>
   <div class="grab"></div>
   <h2 id="sheetTitle">Пополнение</h2>
   <p id="sheetHint"></p>
+  <div class="field" id="dateField">
+    <label for="sheetDate" id="sheetDateLabel">Дата</label>
+    <div class="daypick">
+      <div class="chips" id="dayChips" role="group" aria-label="Быстрый выбор дня">
+        <button type="button" class="chip" data-off="0">Сегодня</button>
+        <button type="button" class="chip" data-off="-1">Вчера</button>
+        <button type="button" class="chip" data-off="-2">Позавчера</button>
+      </div>
+      <input id="sheetDate" type="date">
+    </div>
+  </div>
   <div class="seg" id="kindSeg" role="group" aria-label="Тип траты">
     <button type="button" id="kindBuy" aria-pressed="true">Покупка картой</button>
     <button type="button" id="kindCash" aria-pressed="false">Перевод · наличные · СБП</button>
@@ -526,7 +540,6 @@ input[type="date"] { min-height: 46px; }
     <div class="field"><label for="sheetN">«Осталось внести», ₽</label><input id="sheetN" type="text" inputmode="decimal" placeholder="если есть"></div>
     <div class="field"><label for="sheetNd">до</label><input id="sheetNd" type="date"></div>
   </div>
-  <div class="field" id="dateField"><label for="sheetDate" id="sheetDateLabel">Дата</label><input id="sheetDate" type="date"></div>
   <div class="err" id="sheetErr"></div>
   <div class="actions">
     <button class="btn ghost" type="button" id="sheetCancel">Отмена</button>
@@ -1141,7 +1154,9 @@ input[type="date"] { min-height: 46px; }
     for (const x of (ev[d] || [])) rows.push("<div class='ios-r ic-row'><span class='ic " + x.k + "'>" + IC[x.k] + "</span><span class='l'>" + x.t + "</span></div>");
     if (d > today && Number(d.slice(8, 10)) === 1) rows.push("<div class='ios-r ic-row'><span class='ic buy'>" + IC.buy + "</span><span class='l'>С этого дня покупки беспроцентные до " + human(deadlineOf(monthOf(d))) + "</span></div>");
     if (!rows.length) rows.push("<div class='ios-r'><span class='l' style='color:var(--muted)'>Записей нет</span></div>");
-    const html = "<div class='ios-h'>" + cap(wdName) + ", " + human(d) + (d === today ? " · сегодня" : "") + "</div><div class='ios-g'>" + rows.join("") + "</div>";
+    const canAdd = d >= state.startDate && d <= today;
+    const add = canAdd ? "<div class='di-add'><button type='button' class='btn primary small' data-add='in'>+ Пополнил</button><button type='button' class='btn ghost small' data-add='out'>− Потратил</button></div>" : "";
+    const html = "<div class='ios-h'>" + cap(wdName) + ", " + human(d) + (d === today ? " · сегодня" : "") + "</div><div class='ios-g'>" + rows.join("") + "</div>" + add;
     const box = $("dayInfo");
     if (box.dataset.v === html) return;
     box.innerHTML = html; box.dataset.v = html;
@@ -1157,6 +1172,10 @@ input[type="date"] { min-height: 46px; }
     calYm = addMonths(calYm, step); calSel = null; calDir = step;
     calRefresh();
   }
+  $("dayInfo").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-add]");
+    if (b && calSel) openSheet(b.dataset.add, calSel);
+  });
   $("calAhead").addEventListener("click", (e) => {
     const b = e.target.closest("button[data-d]");
     if (!b) return;
@@ -1328,13 +1347,22 @@ input[type="date"] { min-height: 46px; }
       ? "<b>Комиссия ~" + rub2(fee) + "</b>, в долг уйдёт " + rub2(a + fee) + ". Беспроцентного периода нет: проценты начисляются с первого дня."
       : "<b>Дорого:</b> комиссия " + numStr(state.feePct) + "% + " + rub(state.feeFix) + " и проценты с первого дня. Если можно — заплати картой в магазине.";
   }
-  function openSheet(mode) {
+  function syncDayChips() {
+    const today = todayISO(), v = $("sheetDate").value;
+    $("dayChips").querySelectorAll(".chip").forEach((b) => {
+      const d = addDays(today, Number(b.dataset.off));
+      b.hidden = d < state.startDate;
+      b.setAttribute("aria-pressed", String(d === v));
+    });
+  }
+  function openSheet(mode, presetDate) {
     sheetMode = mode;
     const c = configured() ? compute() : null;
     const today = todayISO();
+    const onDay = isDate(presetDate) && presetDate <= today ? presetDate : today;
     const cfg = {
       in: { title: "Пополнение", hint: "Сколько положил на кредитку. Всё это идёт в счёт долга.", chips: [state.incMin, Math.round((state.incMin + state.incMax) / 2), state.incMax], ok: "Записать", date: "Дата" },
-      out: { title: "Трата с карты", hint: c && c.now.debt > 0 ? "Сегодня ещё можно " + rub(Math.max(0, Math.floor(c.left))) + "." : "Сколько потратил с кредитки.", chips: [100, 300, 500, 1000], ok: "Записать", date: "Дата" },
+      out: { title: "Трата с карты", hint: onDay !== today ? "Сколько потратил с кредитки " + human(onDay) + "." : c && c.now.debt > 0 ? "Сегодня ещё можно " + rub(Math.max(0, Math.floor(c.left))) + "." : "Сколько потратил с кредитки.", chips: [100, 300, 500, 1000], ok: "Записать", date: "Дата" },
       sync: { title: "Сверка с банком", hint: "Перепиши из СберБанк Онлайн «Вся задолженность на сегодня» и, если есть, «Осталось внести … до …». Расчёт пойдёт от этих цифр.", chips: [], ok: "Сохранить", date: "Дата" },
       mp: { title: "Обязательный платёж", hint: "Впиши, сколько осталось внести и до какого числа, как в приложении банка. Если уже внесён полностью, впиши 0.", chips: [], ok: "Сохранить", date: "Внести до" }
     }[mode];
@@ -1345,7 +1373,11 @@ input[type="date"] { min-height: 46px; }
     $("kindSeg").hidden = mode !== "out";
     $("syncExtra").hidden = mode !== "sync";
     $("sheetAmount").value = mode === "sync" && c ? numStr(c.now.debt) : mode === "mp" && state.mp && !mpStatus(today).past ? numStr(state.mp.a) : "";
-    $("sheetDate").value = mode === "mp" ? (state.mp && !mpStatus(today).past ? state.mp.d : "") : today;
+    $("sheetDate").value = mode === "mp" ? (state.mp && !mpStatus(today).past ? state.mp.d : "") : onDay;
+    $("dayChips").hidden = mode === "mp";
+    if (mode === "mp") { $("sheetDate").removeAttribute("max"); $("sheetDate").min = today; }
+    else { $("sheetDate").max = today; $("sheetDate").min = state.startDate; }
+    syncDayChips();
     $("sheetN").value = ""; $("sheetNd").value = "";
     $("sheetErr").textContent = "";
     if (mode === "out") setKind("buy");
@@ -1430,7 +1462,10 @@ input[type="date"] { min-height: 46px; }
       return toast(a > 0 ? "Платёж " + rub2(a) + " до " + human(d) + " записан" : "Записал: платёж внесён");
     }
     if (!isFinite(a) || a < 0 || (sheetMode !== "sync" && a === 0)) return err("Впиши сумму цифрами, например 4000");
-    const day = isDate(d) ? d : todayISO();
+    if (!isDate(d)) return err("Выбери дату");
+    if (d > todayISO()) return err("Нельзя записать на будущий день. Выбери сегодня или раньше.");
+    if (d < state.startDate) return err("Учёт начат " + human(state.startDate) + ". Раньше этой даты записать нельзя: эти траты уже есть в долге, который ты вписал.");
+    const day = d;
     const entry = { id: newId(), t: sheetMode, a: r2(a), d: day, ts: Date.now() };
     if (sheetMode === "out") { entry.k = outKind; if (outKind === "cash") entry.fee = feeFor(a); }
     if (sheetMode === "sync") {
@@ -1448,8 +1483,9 @@ input[type="date"] { min-height: 46px; }
     settleDelay = 120;
     closeSheet(); save(); settleDelay = 0;
     const after = compute();
-    if (sheetMode === "in") toast("+" + rub2(a) + " · долг теперь " + rub2(after.now.debt));
-    else if (sheetMode === "out") toast(entry.k === "cash" ? "Записал с комиссией " + rub2(entry.fee) : after.left >= 0 ? "Записал. Сегодня ещё можно " + rub(Math.floor(after.left)) : "Записал. Перерасход " + rub(-after.left));
+    const onOther = day !== todayISO() ? " на " + human(day) : "";
+    if (sheetMode === "in") toast("+" + rub2(a) + onOther + " · долг теперь " + rub2(after.now.debt));
+    else if (sheetMode === "out") toast(entry.k === "cash" ? "Записал" + onOther + " с комиссией " + rub2(entry.fee) : onOther ? "Записал трату" + onOther : after.left >= 0 ? "Записал. Сегодня ещё можно " + rub(Math.floor(after.left)) : "Записал. Перерасход " + rub(-after.left));
     else toast("Сверено: " + rub2(a) + (Math.abs(after.now.debt - before.now.debt) >= 1 ? " (разница " + rub(after.now.debt - before.now.debt) + ")" : ""));
   });
   $("sheetAmount").addEventListener("input", updateFee);
@@ -1590,6 +1626,14 @@ input[type="date"] { min-height: 46px; }
   accordion($("whyBox"), $("whyBox").querySelector(".why-body"));
 
   // ---------- wiring ----------
+  $("dayChips").addEventListener("click", (e) => {
+    const b = e.target.closest(".chip[data-off]");
+    if (!b) return;
+    $("sheetDate").value = addDays(todayISO(), Number(b.dataset.off));
+    $("sheetErr").textContent = "";
+    syncDayChips();
+  });
+  $("sheetDate").addEventListener("change", () => { $("sheetErr").textContent = ""; syncDayChips(); });
   $("btnIn").addEventListener("click", () => openSheet("in"));
   $("btnOut").addEventListener("click", () => openSheet("out"));
   $("btnSync").addEventListener("click", () => openSheet("sync"));
